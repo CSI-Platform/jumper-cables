@@ -3,6 +3,11 @@
 Status: released to GitHub and https://jc.csi.run on 2026-11-06 at 14:38 Arizona
 time, following user approval.
 
+The live site and GitHub application source remain at that verified release.
+Four subsequent maintenance fixes have passed 22 checks locally but are not yet
+published or deployed; see **Pending maintenance** below. The public release was
+validated with 18 checks. Documentation updates do not change the deployed app.
+
 ## Scope and destination
 
 Publish the existing static command builder, without adding model hosting or
@@ -45,7 +50,7 @@ default branch contained only the initial README when inspected.
   inspected.
 - Wrangler 4.158.0 dry run succeeds with the single generated HTML asset and no
   application bindings. That preflight did not upload a Worker; the production
-deployment is recorded below.
+  deployment is recorded below.
 - Public source and output were checked for the known private machine/profile
   identifiers. The public page contains a null profile; private profiles remain
   outside the repository and public asset directory.
@@ -88,3 +93,20 @@ Before this release, Worker `jc` served version
 Use the Worker's deployment history to roll back to it if necessary; do not
 delete the Worker, DNS record, or route. Keep the source commit for correction and
 redeployment. All local background services previously disabled remain disabled.
+
+## Pending maintenance — 2026-11-06
+
+Status: applied locally as commit `9dff50b`; not yet in GitHub's application source
+or deployed to the live site.
+
+Corrected four readiness/warning defects confirmed by browser regression checks:
+comma-separated host addresses now warn if any address is not loopback;
+`--spec-default` no longer counts as a model source; `--no-agent` no longer reports
+agent tools as enabled; and `--tools-runtime none` no longer suppresses the
+warning about executing shell/write tools directly on the host. Real model
+presets, multiple loopback addresses, and external runtime choices remain supported.
+
+All 22 browser acceptance checks pass, including the four new regressions. The
+Python build succeeds with the same 257-option catalog. The deployed asset was
+checked before this patch and still matched the release recorded above. No model
+was started, dependencies were not upgraded, and the public site was not changed.
