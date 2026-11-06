@@ -1,15 +1,15 @@
-# Jumper Cables release candidate — 2026-11-06
+# Jumper Cables release — 2026-11-06
 
-Status: prepared for publishing approval. No GitHub push or Cloudflare deployment
-has been performed for this candidate.
+Status: released to GitHub and https://jc.csi.run on 2026-11-06 at 14:38 Arizona
+time, following user approval.
 
 ## Scope and destination
 
 Publish the existing static command builder, without adding model hosting or
 starting a local model. Source repository: `CSI-Platform/jumper-cables`, branch
 `main`. Cloudflare Worker: `jc`. Existing route: `jc.csi.run/*` in zone `csi.run`.
-The domain currently serves a generic placeholder. Its proxied DNS record and
-Worker route were checked against the Cloudflare API; this release preserves them.
+The domain previously served a generic placeholder. Its proxied DNS record and
+Worker route were checked against the Cloudflare API and preserved during release.
 
 The initial implementation was recovered from uncommitted local files. The remote
 default branch contained only the initial README when inspected.
@@ -44,7 +44,8 @@ default branch contained only the initial README when inspected.
 - Desktop (1440×1000), tablet (1000×700), and mobile (390×844) screenshots were
   inspected.
 - Wrangler 4.158.0 dry run succeeds with the single generated HTML asset and no
-  application bindings. No Worker was uploaded.
+  application bindings. That preflight did not upload a Worker; the production
+deployment is recorded below.
 - Public source and output were checked for the known private machine/profile
   identifiers. The public page contains a null profile; private profiles remain
   outside the repository and public asset directory.
@@ -61,15 +62,23 @@ default branch contained only the initial README when inspected.
 - GPU estimates are deliberately rough. Browser tests block external font
   requests and verify the fallback layout.
 
-## Publish and verify after approval
+## Published result
 
-1. Push the prepared source commit to `CSI-Platform/jumper-cables` on `main`.
-2. Authenticate Wrangler to the account containing the existing `jc` Worker and
-   run the pinned deploy command in `README.md`.
-3. Verify that `https://jc.csi.run` serves this generated app, compare the returned
-   asset with `public/index.html`, and exercise the live command builder on desktop
-   and mobile. Verify that no private profile is present.
-4. Record the new commit and deployment/version identifiers here.
+- Source commit: `58598260cc2174eb71208bacd78848bfbf98b25c`.
+- Cloudflare version: `57d9ac2b-5047-48e3-af35-435c78377922`.
+- Deployment: `54065b9b-cfd0-497a-9de0-6b8844be22ac`, at 100% traffic.
+- Live HTML SHA-256: `3f0ec92202e64a7151981ba5a4d21c33a27c8146ea152f207d50debf90bb3b0b`,
+  identical to the approved local asset.
+- Live Chrome verification passed: HTTP 200; 257 options; no private profile or
+  template placeholders; command generation; desktop topic navigation; tablet
+  sidebar clearance; mobile focus containment and closing; no JavaScript errors.
+- No actual model or local application server was started.
+
+The terminal's GitHub account did not have push access, so the connected GitHub
+app published the source. Its Git tree matches the verified local candidate
+exactly. Local `main` was aligned to the published commit; the original local
+commits remain on `release/local-candidate-2026-11-06`. Future publishing should
+use the connected app or a terminal account with repository write access.
 
 ## Recovery
 
