@@ -1,0 +1,1312 @@
+{
+ "-m": {
+  "cat": "model",
+  "level": "S",
+  "plain": "The model file to load from disk. This is the one option you always need unless you download a model with one of the options below.",
+  "short": "The model file to run"
+ },
+ "-mu": {
+  "cat": "model",
+  "level": "A",
+  "plain": "Downloads a model from a direct web link instead of using a file you already have."
+ },
+ "-dr": {
+  "cat": "model",
+  "level": "A",
+  "plain": "Downloads a model from Docker Hub's AI model collection, for example gemma3."
+ },
+ "-hf": {
+  "cat": "model",
+  "level": "U",
+  "plain": "Downloads a GGUF model from Hugging Face by name, then runs it. You can add the quality level after a colon, such as :Q4_K_M. If the repo includes a vision file, that downloads too.",
+  "short": "Downloads this model from Hugging Face, then runs it"
+ },
+ "-hff": {
+  "cat": "model",
+  "level": "A",
+  "plain": "Picks one exact file inside the Hugging Face repo named by --hf-repo, for when the quality shortcut isn't precise enough."
+ },
+ "-hft": {
+  "cat": "model",
+  "level": "A",
+  "plain": "Your Hugging Face access token. You only need it for private or gated models. Prefer the HF_TOKEN environment variable so the token doesn't show up in your process list."
+ },
+ "--offline": {
+  "cat": "model",
+  "level": "U",
+  "plain": "Blocks all network access for model downloads and uses only what's already cached. A good safety setting once your models are downloaded."
+ },
+ "-cl": {
+  "cat": "model",
+  "level": "U",
+  "plain": "Lists the models llama.cpp has already downloaded to its cache, then exits without starting a server."
+ },
+ "-c": {
+  "cat": "context",
+  "level": "S",
+  "plain": "The size of the context window: how many tokens the model can hold in mind at once, counting the conversation, its reasoning and the reply. Bigger means longer chats and uses more GPU memory. 0 means use the model's own maximum.",
+  "short": "How much the model can hold in mind, in tokens"
+ },
+ "-np": {
+  "cat": "context",
+  "level": "S",
+  "plain": "How many chats the server can run at the same moment. Each one is a slot. Without a unified cache, the context window gets divided between slots, so 4 slots on a 56,000-token window would give each about 14,000.",
+  "short": "How many chats can run at once"
+ },
+ "--keep": {
+  "cat": "context",
+  "level": "A",
+  "plain": "How many tokens from the start of the prompt to protect when the server has to drop old text to make room. -1 keeps the whole initial prompt. Only matters with --context-shift."
+ },
+ "--context-shift": {
+  "cat": "context",
+  "level": "U",
+  "plain": "When the context fills up, drops the oldest text so generation can continue. Without it, the reply stops at the limit. The model forgets what was dropped, so it can lose track of earlier parts of the chat."
+ },
+ "--cache-prompt": {
+  "cat": "context",
+  "level": "U",
+  "plain": "Reuses the part of the conversation already processed, so each new message only processes what's new. This is why long chats don't restart from zero on every reply. Leave it on."
+ },
+ "--cache-reuse": {
+  "cat": "context",
+  "level": "A",
+  "plain": "Tries to reuse matching chunks of at least N tokens even when they've moved position in the prompt. It can speed up editing an earlier message or long documents. 0 turns it off."
+ },
+ "-cram": {
+  "cat": "context",
+  "level": "U",
+  "plain": "Limits the prompt cache that holds recent conversations in system RAM, so switching back to one is faster. 0 turns the cache off and -1 removes the limit."
+ },
+ "--cache-idle-slots": {
+  "cat": "context",
+  "level": "A",
+  "plain": "When a new task arrives, saves idle slots to the prompt cache first so their work isn't lost. Requires --cache-ram."
+ },
+ "-ctxcp": {
+  "cat": "context",
+  "level": "A",
+  "plain": "How many restore points the server keeps per slot. These let it go back to an earlier state without reprocessing everything, which helps when you edit or regenerate messages."
+ },
+ "-cms": {
+  "cat": "context",
+  "level": "A",
+  "plain": "The minimum distance between those restore points, in tokens. Lower values make more frequent restore points and use more memory."
+ },
+ "-sps": {
+  "cat": "context",
+  "level": "A",
+  "plain": "With several slots, decides how closely a new request must match a slot's existing conversation to reuse that slot. 0 turns the check off. It rarely matters with one slot."
+ },
+ "-kvu": {
+  "cat": "context",
+  "level": "A",
+  "plain": "Shares one context pool across all slots, so a busy chat can use space an idle one isn't using. It's on by default only when the slot count is automatic."
+ },
+ "--kv-unified-per-slot": {
+  "cat": "context",
+  "level": "A",
+  "plain": "Caps how much of the shared pool each slot can use. If you don't set --ctx-size, the pool is sized to slots times this number."
+ },
+ "--slot-save-path": {
+  "cat": "context",
+  "level": "A",
+  "plain": "A folder where a slot's memory can be saved and restored through the API, so a long session can be paused and resumed. Off unless you give a folder."
+ },
+ "--swa-full": {
+  "cat": "context",
+  "level": "N",
+  "plain": "Uses a full-size cache for models that use sliding-window attention. It uses more memory but allows better reuse on those particular models."
+ },
+ "-ngl": {
+  "cat": "gpu",
+  "level": "S",
+  "plain": "How many of the model's layers run on the GPU. GPU layers are much faster. A number sets an exact count, all puts everything on the GPU, and auto lets the server decide. Layers that don't fit run on the CPU using system RAM.",
+  "short": "How many model layers run on the GPU"
+ },
+ "-fit": {
+  "cat": "gpu",
+  "level": "S",
+  "plain": "Auto-sizing. When on, the server adjusts any memory settings you didn't set so everything fits in GPU memory. It only changes settings you left unset, so an explicit -c or -ngl stays as you wrote it.",
+  "short": "Adjusts unset memory settings so everything fits"
+ },
+ "-fitt": {
+  "cat": "gpu",
+  "level": "U",
+  "plain": "How much GPU memory auto-fit leaves free as a safety margin, in MiB. A lower margin gives you more context but leaves less room for your desktop and other apps."
+ },
+ "-fitc": {
+  "cat": "gpu",
+  "level": "A",
+  "plain": "The smallest context size auto-fit is allowed to choose. If even this won't fit, it moves layers off the GPU instead of shrinking context further."
+ },
+ "-kvo": {
+  "cat": "gpu",
+  "level": "U",
+  "plain": "Controls where context memory lives. It's on the GPU by default. The -nkvo form keeps it in system RAM instead, which frees a lot of GPU memory but makes generation slower."
+ },
+ "-ctk": {
+  "cat": "gpu",
+  "level": "A",
+  "plain": "The number format for half of the context memory (the keys). Lower-precision formats such as q8_0 can use much less memory but may reduce quality or fail on some setups."
+ },
+ "-ctv": {
+  "cat": "gpu",
+  "level": "A",
+  "plain": "The same as --cache-type-k, for the other half of the context memory (the values)."
+ },
+ "-b": {
+  "cat": "gpu",
+  "level": "U",
+  "plain": "The most tokens the server will accept in one processing step, before splitting them up. Larger values can read long prompts faster and use more memory."
+ },
+ "-ub": {
+  "cat": "gpu",
+  "level": "U",
+  "plain": "The batch size actually sent to the hardware at once. This one has a direct effect on GPU memory. Lower it if you run out of memory while reading long prompts. Higher can be faster."
+ },
+ "-cb": {
+  "cat": "gpu",
+  "level": "A",
+  "plain": "Lets new requests join work already in progress instead of waiting. It only matters when several chats are running at once. Leave it on."
+ },
+ "-fa": {
+  "cat": "gpu",
+  "level": "A",
+  "plain": "Flash Attention, a faster way of doing part of the model's math. Auto lets the server use it where it works. Force it on or off only when troubleshooting."
+ },
+ "-lm": {
+  "cat": "gpu",
+  "level": "U",
+  "plain": "How the model file gets loaded. mmap reads it from disk on demand and is the normal default. mlock pins it in RAM so the system can't swap it out. dio uses direct disk reads."
+ },
+ "-lzm": {
+  "cat": "gpu",
+  "level": "A",
+  "plain": "Reads certain huge tensors from disk only as needed instead of keeping them in memory. Auto only does this for tensors over 4 GiB, which your 1.6 GB model file doesn't have."
+ },
+ "--repack": {
+  "cat": "gpu",
+  "level": "A",
+  "plain": "Rearranges model weights in memory so the CPU can process them faster. It's useful for layers running on the CPU. Leave it on."
+ },
+ "--no-host": {
+  "cat": "gpu",
+  "level": "A",
+  "plain": "Skips a normal memory-transfer step so other optimized memory buffers can be used. It's for troubleshooting and tuning."
+ },
+ "--op-offload": {
+  "cat": "gpu",
+  "level": "A",
+  "plain": "Allows the GPU to run certain operations on data that sits in system memory. On by default, and rarely worth changing."
+ },
+ "-dev": {
+  "cat": "gpu",
+  "level": "A",
+  "plain": "Chooses which hardware to use, by name. Use none to force CPU only. Run --list-devices to see the names."
+ },
+ "-sm": {
+  "cat": "gpu",
+  "level": "N",
+  "plain": "How to divide a model across several GPUs."
+ },
+ "-ts": {
+  "cat": "gpu",
+  "level": "N",
+  "plain": "What share of the model each GPU gets, such as 3,1 for a 75/25 split."
+ },
+ "-mg": {
+  "cat": "gpu",
+  "level": "N",
+  "plain": "Which GPU is the main one in a multi-GPU machine."
+ },
+ "--rpc": {
+  "cat": "gpu",
+  "level": "A",
+  "plain": "Sends part of the work to other computers running llama.cpp's RPC server, so several machines can share a model. Only use this on a network you trust."
+ },
+ "-ot": {
+  "cat": "gpu",
+  "level": "A",
+  "plain": "Places specific parts of the model on a specific device, using name patterns. A power-user way of fitting a model precisely when layer counts aren't fine-grained enough."
+ },
+ "-cmoe": {
+  "cat": "gpu",
+  "level": "N",
+  "plain": "Keeps the expert weights of a Mixture of Experts model on the CPU, which saves a lot of GPU memory on those models."
+ },
+ "-ncmoe": {
+  "cat": "gpu",
+  "level": "N",
+  "plain": "The same as --cpu-moe, but only for the first N layers."
+ },
+ "--moe-cache-mib": {
+  "cat": "gpu",
+  "level": "N",
+  "plain": "A GPU cache for the expert weights that are being kept on the CPU."
+ },
+ "-ncffn": {
+  "cat": "gpu",
+  "level": "A",
+  "plain": "Keeps the main dense (FFN) weights of the first N layers on the CPU. A finer way to save GPU memory on non-MoE models, trading some speed."
+ },
+ "--sleep-idle-seconds": {
+  "cat": "gpu",
+  "level": "U",
+  "plain": "After this many idle seconds, the server goes to sleep and releases the model from memory. The next request wakes it up, with a delay while it reloads."
+ },
+ "-t": {
+  "cat": "cpu",
+  "level": "U",
+  "plain": "How many CPU threads to use while generating. The default picks automatically. Too many can actually slow things down.",
+  "short": "CPU threads used while generating"
+ },
+ "-tb": {
+  "cat": "cpu",
+  "level": "A",
+  "plain": "The same as --threads, but for reading the prompt. It defaults to the --threads value."
+ },
+ "--threads-http": {
+  "cat": "cpu",
+  "level": "A",
+  "plain": "How many threads handle incoming web requests. Automatic is fine unless many clients connect at once."
+ },
+ "--prio": {
+  "cat": "cpu",
+  "level": "A",
+  "plain": "How strongly the system should favor this process over others, from low to realtime. High values can make the rest of your desktop sluggish."
+ },
+ "--poll": {
+  "cat": "cpu",
+  "level": "A",
+  "plain": "How actively threads wait for work. Higher responds faster but burns more CPU while waiting. 0 waits quietly."
+ },
+ "--numa": {
+  "cat": "cpu",
+  "level": "N",
+  "plain": "Optimizations for multi-socket servers, where parts of the RAM are closer to some CPUs than others."
+ },
+ "-C": {
+  "cat": "cpu",
+  "level": "A",
+  "plain": "Restricts generation to certain CPU cores, using a hex bitmask."
+ },
+ "-Cr": {
+  "cat": "cpu",
+  "level": "A",
+  "plain": "Restricts generation to a range of CPU cores, such as 0-5. An easier form of --cpu-mask."
+ },
+ "--cpu-strict": {
+  "cat": "cpu",
+  "level": "A",
+  "plain": "Forces threads to stay on the exact cores you selected instead of letting the system move them."
+ },
+ "-Cb": {
+  "cat": "cpu",
+  "level": "A",
+  "plain": "The same as --cpu-mask, for prompt processing."
+ },
+ "-Crb": {
+  "cat": "cpu",
+  "level": "A",
+  "plain": "The same as --cpu-range, for prompt processing."
+ },
+ "--cpu-strict-batch": {
+  "cat": "cpu",
+  "level": "A",
+  "plain": "The same as --cpu-strict, for prompt processing."
+ },
+ "--prio-batch": {
+  "cat": "cpu",
+  "level": "A",
+  "plain": "The same as --prio, for prompt processing."
+ },
+ "--poll-batch": {
+  "cat": "cpu",
+  "level": "A",
+  "plain": "The same as --poll, for prompt processing."
+ },
+ "--temp": {
+  "cat": "sampling",
+  "level": "S",
+  "plain": "The main creativity dial. Lower gives focused, predictable answers and higher gives varied, surprising ones. 0 nearly always picks the single most likely word.",
+  "short": "How varied the wording gets"
+ },
+ "--top-p": {
+  "cat": "sampling",
+  "level": "S",
+  "plain": "Keeps only the most likely next words until their combined probability reaches this value, then picks from those. Lower is more focused. 1.0 turns it off.",
+  "short": "Limits word choice to the most likely group"
+ },
+ "--min-p": {
+  "cat": "sampling",
+  "level": "S",
+  "plain": "Removes any word whose chance is below this fraction of the top word's chance. It trims unlikely words while adapting to how sure the model is. 0 turns it off.",
+  "short": "Drops words far less likely than the best one"
+ },
+ "--top-k": {
+  "cat": "sampling",
+  "level": "U",
+  "plain": "Only considers the K most likely next words. Lower is more conservative. 0 turns it off.",
+  "short": "Limits word choice to the top few candidates"
+ },
+ "--repeat-penalty": {
+  "cat": "sampling",
+  "level": "U",
+  "plain": "Makes recently used words less likely, which helps when a model gets stuck repeating itself. 1.0 is off. Too high makes writing feel strained."
+ },
+ "--repeat-last-n": {
+  "cat": "sampling",
+  "level": "U",
+  "plain": "How many recent tokens the repeat penalties look back over. 0 turns this off."
+ },
+ "--presence-penalty": {
+  "cat": "sampling",
+  "level": "A",
+  "plain": "Discourages any word that has already appeared, however often, which nudges the model toward new topics. 0 is off."
+ },
+ "--frequency-penalty": {
+  "cat": "sampling",
+  "level": "A",
+  "plain": "Discourages words in proportion to how often they've appeared. 0 is off."
+ },
+ "-s": {
+  "cat": "sampling",
+  "level": "U",
+  "plain": "The random starting number. The same seed, prompt and settings should produce a very similar reply, which is useful for testing. -1 picks a random seed each time."
+ },
+ "--samplers": {
+  "cat": "sampling",
+  "level": "A",
+  "plain": "Sets which sampling steps run and in what order, written out by name. Order matters, because each step filters what the next one sees."
+ },
+ "--sampler-seq": {
+  "cat": "sampling",
+  "level": "A",
+  "plain": "The same as --samplers, written as a short string of single letters."
+ },
+ "--top-nsigma": {
+  "cat": "sampling",
+  "level": "A",
+  "plain": "Keeps words that score within a set statistical distance of the best one. An alternative to top-k and top-p. -1 is off."
+ },
+ "--typical": {
+  "cat": "sampling",
+  "level": "A",
+  "plain": "Favors words of typical likelihood instead of only the most likely, which can make writing feel more natural. 1.0 is off."
+ },
+ "--xtc-probability": {
+  "cat": "sampling",
+  "level": "A",
+  "plain": "How often XTC runs. XTC sometimes removes the most obvious word choices to force more variety. 0 is off."
+ },
+ "--xtc-threshold": {
+  "cat": "sampling",
+  "level": "A",
+  "plain": "How likely a word must be for XTC to count it as obvious and remove it."
+ },
+ "--dry-multiplier": {
+  "cat": "sampling",
+  "level": "A",
+  "plain": "The strength of DRY, a penalty that targets repeated phrases rather than single words. 0 is off, and DRY needs this set to do anything."
+ },
+ "--dry-base": {
+  "cat": "sampling",
+  "level": "A",
+  "plain": "How quickly the DRY penalty grows as a repeated phrase gets longer."
+ },
+ "--dry-allowed-length": {
+  "cat": "sampling",
+  "level": "A",
+  "plain": "How long a repeated phrase can be before DRY starts penalizing it."
+ },
+ "--dry-penalty-last-n": {
+  "cat": "sampling",
+  "level": "A",
+  "plain": "How far back DRY looks for repeats. 0 turns it off."
+ },
+ "--dry-sequence-breaker": {
+  "cat": "sampling",
+  "level": "A",
+  "plain": "Characters that reset DRY's repeat matching. Setting your own replaces the defaults (newline, colon, quote, asterisk). Use none for no breakers."
+ },
+ "--adaptive-target": {
+  "cat": "sampling",
+  "level": "A",
+  "plain": "Adaptive-P aims for words near a chosen probability and adjusts over time, which gives a steadier feel across a long reply. Negative values turn it off."
+ },
+ "--adaptive-decay": {
+  "cat": "sampling",
+  "level": "A",
+  "plain": "How fast Adaptive-P reacts. Lower is more reactive and higher is more stable."
+ },
+ "--dynatemp-range": {
+  "cat": "sampling",
+  "level": "A",
+  "plain": "Lets temperature vary by this amount during a reply, based on how sure the model is. 0 is off."
+ },
+ "--dynatemp-exp": {
+  "cat": "sampling",
+  "level": "A",
+  "plain": "Shapes how strongly dynamic temperature responds to the model's uncertainty."
+ },
+ "--mirostat": {
+  "cat": "sampling",
+  "level": "A",
+  "plain": "An older self-adjusting method that aims for a steady level of surprise. Turning it on makes the server ignore top-k, top-p and typical sampling."
+ },
+ "--mirostat-lr": {
+  "cat": "sampling",
+  "level": "A",
+  "plain": "How quickly Mirostat adjusts."
+ },
+ "--mirostat-ent": {
+  "cat": "sampling",
+  "level": "A",
+  "plain": "The level of surprise Mirostat aims for. Lower gives more focused text."
+ },
+ "-bs": {
+  "cat": "sampling",
+  "level": "A",
+  "plain": "Experimental. Runs sampling on the GPU instead of the CPU."
+ },
+ "-n": {
+  "cat": "limits",
+  "level": "U",
+  "plain": "The longest reply allowed, in tokens. -1 means no limit other than the context window. A cap stops a thinking model from running away, but a low one can cut its answers short.",
+  "short": "The longest reply allowed, in tokens"
+ },
+ "-r": {
+  "cat": "limits",
+  "level": "A",
+  "plain": "Stops generating when the model produces this exact text. Mostly for raw text completion. Chat models already know when to stop."
+ },
+ "--ignore-eos": {
+  "cat": "limits",
+  "level": "A",
+  "plain": "Makes the model keep writing past the point where it would normally stop. It's for speed testing and will produce rambling in normal use."
+ },
+ "-l": {
+  "cat": "limits",
+  "level": "A",
+  "plain": "Makes one specific token more or less likely, by its ID number. Useful for banning a token outright, but you have to look up the ID first."
+ },
+ "--grammar": {
+  "cat": "limits",
+  "level": "A",
+  "plain": "Forces replies to follow a formal pattern that you write in the GBNF grammar format, so only valid output can be produced."
+ },
+ "--grammar-file": {
+  "cat": "limits",
+  "level": "A",
+  "plain": "The same as --grammar, read from a file."
+ },
+ "-j": {
+  "cat": "limits",
+  "level": "U",
+  "plain": "Forces replies to be JSON that matches a schema you give. Useful for apps that need to parse the answer. This applies to all requests, so setting it per request in the API is usually better."
+ },
+ "-jf": {
+  "cat": "limits",
+  "level": "U",
+  "plain": "The same as --json-schema, read from a file."
+ },
+ "-sp": {
+  "cat": "limits",
+  "level": "A",
+  "plain": "Shows special control tokens in the output instead of hiding them. Mostly useful for debugging."
+ },
+ "-e": {
+  "cat": "limits",
+  "level": "A",
+  "plain": "Whether sequences like \\n in text you pass on the command line become real newlines. On by default."
+ },
+ "-rea": {
+  "cat": "thinking",
+  "level": "S",
+  "plain": "Turns the model's thinking on or off. Off gives quicker answers, which often means less careful ones. Auto detects support from the chat template.",
+  "short": "Whether the model thinks before answering"
+ },
+ "--reasoning-budget": {
+  "cat": "thinking",
+  "level": "U",
+  "plain": "Limits how many tokens the model can spend thinking. -1 is unlimited, 0 ends thinking immediately, and any higher number is the budget."
+ },
+ "--reasoning-budget-message": {
+  "cat": "thinking",
+  "level": "A",
+  "plain": "Text inserted when the thinking budget runs out, such as a note telling the model to answer now."
+ },
+ "--reasoning-effort": {
+  "cat": "thinking",
+  "level": "N",
+  "plain": "Asks the model to think lightly or deeply, from minimal to max, where the chat template supports it."
+ },
+ "--reasoning-preserve": {
+  "cat": "thinking",
+  "level": "U",
+  "plain": "Keeps earlier thinking in the conversation history instead of only the latest message. This can improve continuity but uses more of your context window, so long chats fill up faster."
+ },
+ "--reasoning-format": {
+  "cat": "thinking",
+  "level": "A",
+  "plain": "How thinking is separated from the answer in API responses. It affects how apps and the web UI display it, not what the model thinks."
+ },
+ "--jinja": {
+  "cat": "thinking",
+  "level": "U",
+  "plain": "Uses the full template engine to format the conversation for the model. Tools and thinking depend on it. On by default.",
+  "short": "The template engine that formats the chat"
+ },
+ "--chat-template": {
+  "cat": "thinking",
+  "level": "A",
+  "plain": "Overrides how messages are formatted for the model, either with template text or the name of a built-in format. A wrong template can make a good model behave badly, so only use this to fix a real problem."
+ },
+ "--chat-template-file": {
+  "cat": "thinking",
+  "level": "A",
+  "plain": "The same as --chat-template, read from a file."
+ },
+ "--chat-template-kwargs": {
+  "cat": "thinking",
+  "level": "U",
+  "plain": "Passes extra settings to the chat template as JSON. For example, {\"enable_thinking\":false} on templates that use that setting."
+ },
+ "--skip-chat-parsing": {
+  "cat": "thinking",
+  "level": "A",
+  "plain": "Sends everything the model writes, including thinking and tool calls, as plain text instead of separating it. It's for debugging and breaks tool use in normal clients."
+ },
+ "--prefill-assistant": {
+  "cat": "thinking",
+  "level": "A",
+  "plain": "If a request ends with an assistant message, continues that message instead of treating it as finished. The --no- form turns this off."
+ },
+ "--tools": {
+  "cat": "tools",
+  "level": "S",
+  "plain": "Lets the model use tools built into the server. Choose from read_file, file_glob_search, grep_search, exec_shell_command, write_file, edit_file and get_info, or use all. Experimental. Limits browser access to localhost by default.",
+  "short": "Built-in tools the model may use"
+ },
+ "--tools-runtime": {
+  "cat": "tools",
+  "level": "U",
+  "plain": "Runs those tools somewhere separate from your main system, such as a Docker container or another machine over SSH. This is the safe way to allow file writes or shell commands.",
+  "short": "Where tools run, away from your main system"
+ },
+ "-ag": {
+  "cat": "tools",
+  "level": "U",
+  "plain": "Turns on all built-in tools at once, including running shell commands, and the MCP proxy. A shortcut for full agent mode. Not recommended on your main system without --tools-runtime.",
+  "short": "Turns on every built-in tool, including shell commands"
+ },
+ "--mcp-servers-config": {
+  "cat": "tools",
+  "level": "U",
+  "plain": "Connects MCP servers listed in a JSON file, in the same format Cursor uses. MCP servers give the model abilities such as fetching web pages or using other apps. Experimental."
+ },
+ "--mcp-servers-json": {
+  "cat": "tools",
+  "level": "A",
+  "plain": "The same as --mcp-servers-config, written directly on the command line."
+ },
+ "--ui-mcp-proxy": {
+  "cat": "tools",
+  "level": "U",
+  "plain": "Lets the web UI reach MCP servers that a browser would normally block. Experimental. Don't use it on an untrusted network."
+ },
+ "--lora": {
+  "cat": "adapters",
+  "level": "U",
+  "plain": "Loads a LoRA adapter on top of the base model. A LoRA is a small add-on that changes how the model behaves using extra training. It must have been trained for this base model."
+ },
+ "--lora-scaled": {
+  "cat": "adapters",
+  "level": "A",
+  "plain": "The same as --lora, with a strength for each adapter, where 1.0 is full strength."
+ },
+ "--lora-init-without-apply": {
+  "cat": "adapters",
+  "level": "A",
+  "plain": "Loads adapters switched off so you can turn them on later through the API, without a restart."
+ },
+ "--control-vector": {
+  "cat": "adapters",
+  "level": "A",
+  "plain": "Loads a control vector, a way of steering a model's personality or tone without retraining it."
+ },
+ "--control-vector-scaled": {
+  "cat": "adapters",
+  "level": "A",
+  "plain": "The same as --control-vector, with a strength for each vector."
+ },
+ "--control-vector-layer-range": {
+  "cat": "adapters",
+  "level": "A",
+  "plain": "Limits a control vector to certain layers of the model."
+ },
+ "--host": {
+  "cat": "network",
+  "level": "S",
+  "plain": "Which network address the server listens on. 127.0.0.1 means only this computer can reach it. 0.0.0.0 opens it to your whole network, so add an API key if you do that.",
+  "short": "Who can reach the server"
+ },
+ "--port": {
+  "cat": "network",
+  "level": "S",
+  "plain": "The port number in the web address. Run two servers at once by giving them different ports.",
+  "short": "The port in the web UI's address"
+ },
+ "--api-key": {
+  "cat": "network",
+  "level": "U",
+  "plain": "Requires a password-like key on API requests. Set this before exposing the server to anything beyond your own computer. Several keys can be comma-separated.",
+  "short": "The key that API requests must include"
+ },
+ "--api-key-file": {
+  "cat": "network",
+  "level": "U",
+  "plain": "The same as --api-key, read from a file with one key per line. This keeps keys off the command line, where other programs could see them.",
+  "short": "Reads the API keys from a file"
+ },
+ "--cors-origins": {
+  "cat": "network",
+  "level": "U",
+  "plain": "Which websites' pages are allowed to call this server from a browser. The default of * allows any website. Setting localhost restricts it to pages on this computer.",
+  "short": "Which websites may call this server"
+ },
+ "--cors-methods": {
+  "cat": "network",
+  "level": "A",
+  "plain": "Which kinds of web requests browser pages can make."
+ },
+ "--cors-headers": {
+  "cat": "network",
+  "level": "A",
+  "plain": "Which request headers browser pages can send."
+ },
+ "--cors-credentials": {
+  "cat": "network",
+  "level": "A",
+  "plain": "Whether browser pages may include credentials such as cookies with their requests."
+ },
+ "--ssl-key-file": {
+  "cat": "network",
+  "level": "A",
+  "plain": "The private key for serving over HTTPS. Use together with --ssl-cert-file. Only needed if traffic leaves this computer without another layer protecting it."
+ },
+ "--ssl-cert-file": {
+  "cat": "network",
+  "level": "A",
+  "plain": "The certificate for serving over HTTPS."
+ },
+ "-to": {
+  "cat": "network",
+  "level": "A",
+  "plain": "How long a connection can sit before the server gives up, in seconds. The default is one hour."
+ },
+ "--sse-ping-interval": {
+  "cat": "network",
+  "level": "A",
+  "plain": "How often the server sends keep-alive signals during streamed replies, so proxies don't close a slow connection. -1 turns it off."
+ },
+ "--reuse-port": {
+  "cat": "network",
+  "level": "A",
+  "plain": "Lets several server processes share one port, usually for load balancing."
+ },
+ "--api-prefix": {
+  "cat": "network",
+  "level": "A",
+  "plain": "Serves everything under a path, such as /llm, for when the server sits behind a reverse proxy."
+ },
+ "--ui": {
+  "cat": "ui",
+  "level": "S",
+  "plain": "Turns the chat web page on or off. On by default. --no-ui leaves only the API, for servers that only apps talk to.",
+  "short": "The chat web page"
+ },
+ "-a": {
+  "cat": "ui",
+  "level": "U",
+  "plain": "The display name for the model in the web UI and API, rather than the file name. Comma-separate several names.",
+  "short": "The name shown for this model"
+ },
+ "--tags": {
+  "cat": "ui",
+  "level": "A",
+  "plain": "Labels attached to a model for your own information. They don't affect routing."
+ },
+ "--ui-config": {
+  "cat": "ui",
+  "level": "U",
+  "plain": "Sets the web UI's default settings using JSON, such as its theme or sampling defaults, so they apply on any browser."
+ },
+ "--ui-config-file": {
+  "cat": "ui",
+  "level": "U",
+  "plain": "The same as --ui-config, read from a file."
+ },
+ "--path": {
+  "cat": "ui",
+  "level": "A",
+  "plain": "Serves web files from this folder, which lets you replace the built-in web page with your own."
+ },
+ "--metrics": {
+  "cat": "ui",
+  "level": "U",
+  "plain": "Adds a /metrics page with usage statistics such as speed and token counts, in the format Prometheus monitoring reads."
+ },
+ "--props": {
+  "cat": "ui",
+  "level": "A",
+  "plain": "Allows server properties to be changed through POST /props. Reading them is always possible. Off by default because it lets clients change settings."
+ },
+ "--slots": {
+  "cat": "ui",
+  "level": "U",
+  "plain": "Adds a /slots page that shows what each chat slot is doing. On by default. Turn it off if you don't want prompts visible there."
+ },
+ "-mm": {
+  "cat": "vision",
+  "level": "N",
+  "plain": "The vision file (mmproj) that lets a model see images or hear audio. Needs a file built for that specific model.",
+  "short": "The file that lets a model see images or hear audio"
+ },
+ "-mmu": {
+  "cat": "vision",
+  "level": "N",
+  "plain": "The same as --mmproj, downloaded from a web link."
+ },
+ "--mmproj-auto": {
+  "cat": "vision",
+  "level": "A",
+  "plain": "When downloading with --hf-repo, controls whether the vision file comes with it. --no-mmproj skips it, which saves space and memory if you only want text."
+ },
+ "--mmproj-offload": {
+  "cat": "vision",
+  "level": "N",
+  "plain": "Whether the vision file runs on the GPU. --no-mmproj-offload keeps it on the CPU to save GPU memory."
+ },
+ "-mmdev": {
+  "cat": "vision",
+  "level": "N",
+  "plain": "Which hardware runs the vision file."
+ },
+ "--image-min-tokens": {
+  "cat": "vision",
+  "level": "N",
+  "plain": "The fewest tokens an image can use, on vision models with variable resolution."
+ },
+ "--image-max-tokens": {
+  "cat": "vision",
+  "level": "N",
+  "plain": "The most tokens an image can use. Lower saves context but gives the model less detail."
+ },
+ "--mtmd-batch-max-tokens": {
+  "cat": "vision",
+  "level": "N",
+  "plain": "How many image tokens to process in one step. Lower values use less memory."
+ },
+ "--video-fps": {
+  "cat": "vision",
+  "level": "N",
+  "plain": "How many frames per second to take from a video."
+ },
+ "--video-timestamp-interval": {
+  "cat": "vision",
+  "level": "N",
+  "plain": "How often to insert time markers into a video's text, in milliseconds."
+ },
+ "--video-ffmpeg-dir": {
+  "cat": "vision",
+  "level": "N",
+  "plain": "Where to find ffmpeg and ffprobe, the video tools."
+ },
+ "--media-path": {
+  "cat": "vision",
+  "level": "A",
+  "plain": "A folder of local media files that requests can refer to with file:// links. Off by default, because it gives clients access to that folder."
+ },
+ "--embedding": {
+  "cat": "embed",
+  "level": "N",
+  "plain": "Runs the server for embeddings only. Embeddings turn text into numbers for search and comparison. Use it only with a dedicated embedding model."
+ },
+ "--pooling": {
+  "cat": "embed",
+  "level": "N",
+  "plain": "How an embedding model combines word-level results into one result."
+ },
+ "--embd-normalize": {
+  "cat": "embed",
+  "level": "N",
+  "plain": "How embedding numbers get scaled. The default of 2 suits typical similarity search."
+ },
+ "--rerank": {
+  "cat": "embed",
+  "level": "N",
+  "plain": "Adds a reranking endpoint, which scores documents by how well they answer a query. It needs a dedicated reranking model."
+ },
+ "--spm-infill": {
+  "cat": "embed",
+  "level": "A",
+  "plain": "Changes the order of the parts in code-completion prompts, because some models expect suffix, prefix, middle. Only matters for fill-in-the-middle use."
+ },
+ "--models-dir": {
+  "cat": "router",
+  "level": "U",
+  "plain": "Starts router mode, where one server offers every model in a folder and you pick one with the UI's model selector. This is how /model becomes useful."
+ },
+ "--models-preset": {
+  "cat": "router",
+  "level": "U",
+  "plain": "An INI file that lists models and the settings each one should use, such as its own context size. Lets you save your favorite setups."
+ },
+ "--models-max": {
+  "cat": "router",
+  "level": "U",
+  "plain": "How many models the router can hold in memory at once. Older ones are unloaded to make room. 0 means no limit."
+ },
+ "--models-autoload": {
+  "cat": "router",
+  "level": "A",
+  "plain": "Whether the router loads a model automatically when a request asks for it. With this off, you load models yourself."
+ },
+ "--spec-default": {
+  "cat": "spec",
+  "level": "A",
+  "plain": "Turns on a default speculative decoding setup. Speculative decoding guesses several tokens ahead and verifies them in one step, which can speed up replies without changing what the main model would normally write."
+ },
+ "--spec-type": {
+  "cat": "spec",
+  "level": "U",
+  "plain": "Chooses how guessing works, and you can list several. draft-* types use a second small model, while ngram-* types reuse patterns already in the text and need no extra model."
+ },
+ "--spec-draft-model": {
+  "cat": "spec",
+  "level": "U",
+  "plain": "The small second model that does the guessing."
+ },
+ "--spec-draft-hf": {
+  "cat": "spec",
+  "level": "A",
+  "plain": "The same as --hf-repo, for downloading the draft model."
+ },
+ "--spec-draft-ngl": {
+  "cat": "spec",
+  "level": "A",
+  "plain": "How many draft model layers run on the GPU."
+ },
+ "--spec-draft-device": {
+  "cat": "spec",
+  "level": "A",
+  "plain": "Which hardware runs the draft model."
+ },
+ "--spec-draft-n-max": {
+  "cat": "spec",
+  "level": "A",
+  "plain": "The most tokens to guess ahead at once."
+ },
+ "--spec-draft-n-min": {
+  "cat": "spec",
+  "level": "A",
+  "plain": "The fewest guessed tokens worth checking. Shorter guesses get thrown away."
+ },
+ "--spec-draft-p-split": {
+  "cat": "spec",
+  "level": "A",
+  "plain": "The split probability used when drafting: how likely an alternate token must be before a draft branches."
+ },
+ "--spec-draft-p-min": {
+  "cat": "spec",
+  "level": "A",
+  "plain": "How confident the draft model must be to keep guessing. Higher means fewer but safer guesses."
+ },
+ "--spec-draft-sampling": {
+  "cat": "spec",
+  "level": "A",
+  "plain": "How draft tokens get picked: always the top choice (greedy), or randomly with a verification step (probabilistic)."
+ },
+ "--spec-draft-backend-sampling": {
+  "cat": "spec",
+  "level": "A",
+  "plain": "Runs the draft model's sampling on the GPU. On by default."
+ },
+ "--spec-draft-type-k": {
+  "cat": "spec",
+  "level": "A",
+  "plain": "The context memory format for the draft model's keys. The draft version of --cache-type-k."
+ },
+ "--spec-draft-type-v": {
+  "cat": "spec",
+  "level": "A",
+  "plain": "The context memory format for the draft model's values. The draft version of --cache-type-v."
+ },
+ "--spec-draft-threads": {
+  "cat": "spec",
+  "level": "A",
+  "plain": "CPU threads for generating with the draft model."
+ },
+ "--spec-draft-threads-batch": {
+  "cat": "spec",
+  "level": "A",
+  "plain": "CPU threads for prompt processing with the draft model."
+ },
+ "--spec-draft-cpu-mask": {
+  "cat": "spec",
+  "level": "A",
+  "plain": "Restricts the draft model to certain CPU cores, using a hex bitmask."
+ },
+ "--spec-draft-cpu-range": {
+  "cat": "spec",
+  "level": "A",
+  "plain": "Restricts the draft model to a range of CPU cores."
+ },
+ "--spec-draft-cpu-strict": {
+  "cat": "spec",
+  "level": "A",
+  "plain": "Keeps draft model threads on exactly the cores you selected."
+ },
+ "--spec-draft-prio": {
+  "cat": "spec",
+  "level": "A",
+  "plain": "CPU priority for the draft model."
+ },
+ "--spec-draft-poll": {
+  "cat": "spec",
+  "level": "A",
+  "plain": "How actively draft model threads wait for work."
+ },
+ "--spec-draft-cpu-mask-batch": {
+  "cat": "spec",
+  "level": "A",
+  "plain": "The CPU core mask for the draft model's prompt processing."
+ },
+ "--spec-draft-cpu-strict-batch": {
+  "cat": "spec",
+  "level": "A",
+  "plain": "Strict core placement for the draft model's prompt processing."
+ },
+ "--spec-draft-prio-batch": {
+  "cat": "spec",
+  "level": "A",
+  "plain": "CPU priority for the draft model's prompt processing."
+ },
+ "--spec-draft-poll-batch": {
+  "cat": "spec",
+  "level": "A",
+  "plain": "How actively threads wait during the draft model's prompt processing."
+ },
+ "--spec-draft-override-tensor": {
+  "cat": "spec",
+  "level": "A",
+  "plain": "Places specific parts of the draft model on a specific device. The draft version of --override-tensor."
+ },
+ "--spec-draft-cpu-moe": {
+  "cat": "spec",
+  "level": "A",
+  "plain": "Keeps a Mixture of Experts draft model's expert weights on the CPU."
+ },
+ "--spec-draft-n-cpu-moe": {
+  "cat": "spec",
+  "level": "A",
+  "plain": "The same, for only the draft model's first N layers."
+ },
+ "--spec-synth-len": {
+  "cat": "spec",
+  "level": "N",
+  "plain": "Fake guess lengths for benchmarking the speculative system. Not for real use."
+ },
+ "--spec-synth-rates": {
+  "cat": "spec",
+  "level": "N",
+  "plain": "Fake guess success rates for benchmarking. Not for real use."
+ },
+ "--spec-ngram-mod-n-min": {
+  "cat": "spec",
+  "level": "A",
+  "plain": "ngram-mod: the fewest tokens worth guessing at once."
+ },
+ "--spec-ngram-mod-n-max": {
+  "cat": "spec",
+  "level": "A",
+  "plain": "ngram-mod: the most tokens to guess at once."
+ },
+ "--spec-ngram-mod-n-match": {
+  "cat": "spec",
+  "level": "A",
+  "plain": "ngram-mod: how many recent tokens to match when looking for a pattern."
+ },
+ "--spec-ngram-simple-size-n": {
+  "cat": "spec",
+  "level": "A",
+  "plain": "ngram-simple: how many recent tokens to match when looking for a pattern."
+ },
+ "--spec-ngram-simple-size-m": {
+  "cat": "spec",
+  "level": "A",
+  "plain": "ngram-simple: how many tokens to guess after a match."
+ },
+ "--spec-ngram-simple-min-hits": {
+  "cat": "spec",
+  "level": "A",
+  "plain": "ngram-simple: how many times a pattern must appear before it's trusted."
+ },
+ "--spec-ngram-map-k-size-n": {
+  "cat": "spec",
+  "level": "A",
+  "plain": "ngram-map-k: how many recent tokens to match when looking for a pattern."
+ },
+ "--spec-ngram-map-k-size-m": {
+  "cat": "spec",
+  "level": "A",
+  "plain": "ngram-map-k: how many tokens to guess after a match."
+ },
+ "--spec-ngram-map-k-min-hits": {
+  "cat": "spec",
+  "level": "A",
+  "plain": "ngram-map-k: how many times a pattern must appear before it's trusted."
+ },
+ "--spec-ngram-map-k4v-size-n": {
+  "cat": "spec",
+  "level": "A",
+  "plain": "ngram-map-k4v: how many recent tokens to match when looking for a pattern."
+ },
+ "--spec-ngram-map-k4v-size-m": {
+  "cat": "spec",
+  "level": "A",
+  "plain": "ngram-map-k4v: how many tokens to guess after a match."
+ },
+ "--spec-ngram-map-k4v-min-hits": {
+  "cat": "spec",
+  "level": "A",
+  "plain": "ngram-map-k4v: how many times a pattern must appear before it's trusted."
+ },
+ "-lcs": {
+  "cat": "spec",
+  "level": "A",
+  "plain": "A pre-built lookup file for pattern-based guessing. It doesn't change as the server runs."
+ },
+ "-lcd": {
+  "cat": "spec",
+  "level": "A",
+  "plain": "A lookup file for pattern-based guessing that keeps learning as text is generated."
+ },
+ "-h": {
+  "cat": "logs",
+  "level": "U",
+  "plain": "Prints the full list of options and exits. This page was built from its output."
+ },
+ "--version": {
+  "cat": "logs",
+  "level": "U",
+  "plain": "Prints the version and build, then exits."
+ },
+ "--list-devices": {
+  "cat": "logs",
+  "level": "U",
+  "plain": "Lists the hardware the server can use, then exits. A quick way to confirm it sees your GPU."
+ },
+ "--completion-bash": {
+  "cat": "logs",
+  "level": "A",
+  "plain": "Prints a script that adds Tab completion for these options to your terminal."
+ },
+ "--log-file": {
+  "cat": "logs",
+  "level": "U",
+  "plain": "Writes the log to a file, on top of showing it where the server is running."
+ },
+ "--log-disable": {
+  "cat": "logs",
+  "level": "A",
+  "plain": "Turns off logging entirely. This makes problems much harder to diagnose."
+ },
+ "--log-jsonl": {
+  "cat": "logs",
+  "level": "A",
+  "plain": "Writes logs as JSON, one object per line, for other programs to read."
+ },
+ "--log-colors": {
+  "cat": "logs",
+  "level": "A",
+  "plain": "Controls colored log text. Auto uses color only in a terminal."
+ },
+ "-v": {
+  "cat": "logs",
+  "level": "A",
+  "plain": "Logs everything. Output gets very large, so only use it when debugging."
+ },
+ "-lv": {
+  "cat": "logs",
+  "level": "U",
+  "plain": "How much detail to log, from 0 to 5. Raise it to see more detail about what the server is doing."
+ },
+ "--log-prefix": {
+  "cat": "logs",
+  "level": "A",
+  "plain": "Adds a prefix to each log line."
+ },
+ "--log-timestamps": {
+  "cat": "logs",
+  "level": "A",
+  "plain": "Adds the time to each log line."
+ },
+ "--log-prompts-dir": {
+  "cat": "logs",
+  "level": "A",
+  "plain": "Saves every prompt to a folder for debugging. Your conversations will sit on disk in plain text, so turn it off when finished."
+ },
+ "--perf": {
+  "cat": "logs",
+  "level": "U",
+  "plain": "Turns on detailed internal speed timings. Useful when you're benchmarking settings against each other."
+ },
+ "--warmup": {
+  "cat": "logs",
+  "level": "A",
+  "plain": "Runs an empty pass at startup so the first real reply isn't delayed. --no-warmup starts slightly faster."
+ },
+ "--check-tensors": {
+  "cat": "logs",
+  "level": "A",
+  "plain": "Checks the model file for invalid numbers while loading. Useful if you suspect a corrupted download, and makes loading slower."
+ },
+ "--override-kv": {
+  "cat": "lowlevel",
+  "level": "A",
+  "plain": "Changes a value in the model's built-in metadata as it loads, without editing the file. For fixing badly packaged models."
+ },
+ "--rope-scaling": {
+  "cat": "lowlevel",
+  "level": "A",
+  "plain": "How the model handles positions in text when run beyond the context length it was trained on. Don't change this unless a model's documentation tells you to."
+ },
+ "--rope-scale": {
+  "cat": "lowlevel",
+  "level": "A",
+  "plain": "Stretches the model's position handling by a factor of N."
+ },
+ "--rope-freq-base": {
+  "cat": "lowlevel",
+  "level": "A",
+  "plain": "A base number for the model's position math. It's read from the model."
+ },
+ "--rope-freq-scale": {
+  "cat": "lowlevel",
+  "level": "A",
+  "plain": "Another way of stretching position handling, by a factor of 1/N."
+ },
+ "--yarn-orig-ctx": {
+  "cat": "lowlevel",
+  "level": "A",
+  "plain": "YaRN is one method of extending context length. This is the context size the model was originally trained with."
+ },
+ "--yarn-ext-factor": {
+  "cat": "lowlevel",
+  "level": "A",
+  "plain": "A YaRN tuning value that mixes interpolation and extrapolation."
+ },
+ "--yarn-attn-factor": {
+  "cat": "lowlevel",
+  "level": "A",
+  "plain": "A YaRN tuning value for attention strength."
+ },
+ "--yarn-beta-slow": {
+  "cat": "lowlevel",
+  "level": "A",
+  "plain": "A YaRN tuning value (high correction dimension)."
+ },
+ "--yarn-beta-fast": {
+  "cat": "lowlevel",
+  "level": "A",
+  "plain": "A YaRN tuning value (low correction dimension)."
+ },
+ "--embd-gemma-default": {
+  "cat": "presets",
+  "level": "N",
+  "plain": "Sets everything up for EmbeddingGemma, a text-embedding model."
+ },
+ "--fim-qwen-1.5b-default": {
+  "cat": "presets",
+  "level": "A",
+  "plain": "Sets everything up for Qwen 2.5 Coder 1.5B, a code-completion model."
+ },
+ "--fim-qwen-3b-default": {
+  "cat": "presets",
+  "level": "A",
+  "plain": "Sets everything up for Qwen 2.5 Coder 3B, a code-completion model."
+ },
+ "--fim-qwen-7b-default": {
+  "cat": "presets",
+  "level": "N",
+  "plain": "Sets everything up for Qwen 2.5 Coder 7B, a code-completion model."
+ },
+ "--fim-qwen-7b-spec": {
+  "cat": "presets",
+  "level": "N",
+  "plain": "Qwen 2.5 Coder 7B with a 0.5B helper model for faster output."
+ },
+ "--fim-qwen-14b-spec": {
+  "cat": "presets",
+  "level": "N",
+  "plain": "Qwen 2.5 Coder 14B with a 0.5B helper model for faster output."
+ },
+ "--fim-qwen-30b-default": {
+  "cat": "presets",
+  "level": "N",
+  "plain": "Sets everything up for Qwen 3 Coder 30B."
+ },
+ "--gpt-oss-20b-default": {
+  "cat": "presets",
+  "level": "N",
+  "plain": "Sets everything up for gpt-oss-20b."
+ },
+ "--gpt-oss-120b-default": {
+  "cat": "presets",
+  "level": "N",
+  "plain": "Sets everything up for gpt-oss-120b."
+ },
+ "--vision-gemma-4b-default": {
+  "cat": "presets",
+  "level": "A",
+  "plain": "Sets everything up for Gemma 3 4B, a vision-capable model."
+ },
+ "--vision-gemma-12b-default": {
+  "cat": "presets",
+  "level": "N",
+  "plain": "Sets everything up for Gemma 3 12B, a vision-capable model."
+ },
+ "-dt": {
+  "cat": "removed",
+  "level": "N",
+  "plain": "An old setting for tidying context memory. Deprecated."
+ },
+ "--draft": {
+  "cat": "removed",
+  "level": "N",
+  "plain": "Removed in this build. The help text names its replacement. Use --spec-draft-n-max or --spec-ngram-mod-n-max."
+ },
+ "--draft-min": {
+  "cat": "removed",
+  "level": "N",
+  "plain": "Removed in this build. The help text names its replacement. Use --spec-draft-n-min or --spec-ngram-mod-n-min."
+ },
+ "--spec-ngram-size-n": {
+  "cat": "removed",
+  "level": "N",
+  "plain": "Removed in this build. The help text names its replacement. Use the matching --spec-ngram-*-size-n, or --spec-ngram-mod-n-match."
+ },
+ "--spec-ngram-size-m": {
+  "cat": "removed",
+  "level": "N",
+  "plain": "Removed in this build. The help text names its replacement. Use the matching --spec-ngram-*-size-m."
+ },
+ "--spec-ngram-min-hits": {
+  "cat": "removed",
+  "level": "N",
+  "plain": "Removed in this build. The help text names its replacement. Use the matching --spec-ngram-*-min-hits."
+ }
+}

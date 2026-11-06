@@ -1,0 +1,7 @@
+{
+  // Serves public/ as a static site. No server code runs.
+  "name": "jc",
+  "compatibility_date": "2026-11-01",
+  "assets": { "directory": "./public" },
+  "routes": [{ "pattern": "jc.csi.run/*", "zone_name": "csi.run" }]
+}

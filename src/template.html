@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jumper Cables</title>
+<!-- template-preview:start -->
+<script>location.replace(new URL("../public/index.html", location.href).href);</script>
+<!-- template-preview:end -->
+<meta name="description" content="Build the exact command to start a local LLM with the llama.cpp web UI, with every llama-server option explained in plain English.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M1 6h10v-2h4v6h-4V8H1z' fill='%23d93a2b'/%3E%3Cpath d='M19 14H9v2H5v-6h4v2h10z' fill='%2315181d'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: a sidebar to find things, a middle column to choose, and a terminal column that always shows the result. */
+:root {
+  --page: #f7f8f9; --side: #eff1f3; --field: #ffffff; --step: #e8ebee;
+  --ink: #15181d; --ink2: #4b525c; --ink3: #5d646e; --hair: rgb(21 24 29 / .12); --hair2: rgb(21 24 29 / .24);
+  --critical: #b92d1f; --caution: #8a5a00;
+  --term: #14171c; --term-step: #22262d; --term-ink: #eef0f3; --term-ink2: #b4bac3; --term-ink3: #8f96a0; --term-hair: rgb(238 240 243 / .14);
+  --red: #e0432f; --steel: #a4adb8; --term-ok: #74cf9c; --term-warn: #e9b65f; --term-bad: #ff9184;
+  --sans: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "DejaVu Sans Mono", monospace;
+  --ease: cubic-bezier(.22, 1, .36, 1);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --page: #181b20; --side: #121519; --field: #111418; --step: #262a31;
+    --ink: #eceef1; --ink2: #b0b6bf; --ink3: #9aa1ab; --hair: rgb(236 238 241 / .12); --hair2: rgb(236 238 241 / .26);
+    --critical: #ff9184; --caution: #e9b65f;
+    --term: #0d0f13; --term-step: #1c2026;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --page: #181b20; --side: #121519; --field: #111418; --step: #262a31;
+  --ink: #eceef1; --ink2: #b0b6bf; --ink3: #9aa1ab; --hair: rgb(236 238 241 / .12); --hair2: rgb(236 238 241 / .26);
+  --critical: #ff9184; --caution: #e9b65f;
+  --term: #0d0f13; --term-step: #1c2026;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--page); color: var(--ink); font: 400 15px/22px var(--sans); font-variant-numeric: tabular-nums; }
+h1, h2, h3, h4, p, dl, dd, ul, ol { margin: 0; padding: 0; }
+ul, ol { list-style: none; }
+h1, h2, h3, h4 { font-weight: 500; text-wrap: balance; }
+code, pre { font-family: var(--mono); }
+a { color: inherit; text-underline-offset: 2px; }
+svg.i { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.panel :focus-visible { outline-color: var(--term-ink); }
+
+/* Shell */
+.shell { display: grid; grid-template-columns: 248px minmax(0, 1fr) clamp(384px, 32vw, 480px); align-items: start; min-height: 100vh; }
+.side { position: sticky; top: 0; height: 100vh; overflow-y: auto; overscroll-behavior-y: contain; background: var(--side); border-right: 1px solid var(--hair); padding: 20px 12px 32px; }
+.brand { display: flex; align-items: center; gap: 8px; padding: 0 8px 20px; font-size: 16px; font-weight: 600; }
+.brand svg { width: 20px; height: 20px; flex: none; }
+.brand .m1 { fill: var(--red); } .brand .m2 { fill: var(--ink); }
+.nav { display: flex; flex-direction: column; gap: 2px; }
+.nav button { display: flex; justify-content: space-between; align-items: center; gap: 8px; width: 100%; min-height: 32px; padding: 4px 8px; border: 0; border-radius: 8px; background: none; color: var(--ink2); font: 400 14px/20px var(--sans); text-align: left; cursor: pointer; transition: background-color 140ms var(--ease), color 140ms var(--ease); }
+.nav button:hover { background: var(--step); color: var(--ink); }
+.nav button[aria-current="true"] { background: var(--step); color: var(--ink); font-weight: 500; }
+.nav button span { font: 400 12px/16px var(--mono); color: var(--ink3); }
+.navlabel { padding: 24px 8px 8px; font-size: 12px; line-height: 16px; font-weight: 500; color: var(--ink3); }
+.navgroup { display: flex; flex-direction: column; gap: 2px; }
+.only-narrow { display: none !important; }
+.only-small { display: none !important; }
+
+/* Views */
+.view { width: 100%; max-width: 880px; margin: 0 auto; padding: 40px 40px 96px; }
+.view > header { display: grid; gap: 8px; margin-bottom: 32px; }
+h1 { font-size: 30px; line-height: 36px; }
+.sub { color: var(--ink2); max-width: 65ch; }
+.group { display: grid; gap: 12px; padding: 24px 0; border-top: 1px solid var(--hair); }
+.group > h2 { font-size: 16px; line-height: 24px; }
+.setting { display: grid; grid-template-columns: 168px minmax(0, 1fr); gap: 4px 16px; align-items: start; }
+.setting > label, .setting > .lbl { padding-top: 6px; font-size: 14px; line-height: 20px; color: var(--ink2); }
+.setting > .ctrl { display: grid; gap: 8px; min-width: 0; justify-items: start; }
+.help { font-size: 13px; line-height: 20px; color: var(--ink3); max-width: 60ch; }
+.help code { color: var(--ink2); overflow-wrap: anywhere; }
+.help a { color: var(--ink2); }
+
+input[type=text], input[type=number], input[type=search] { width: 100%; min-width: 0; height: 36px; padding: 0 12px; background: var(--field); color: var(--ink); border: 1px solid var(--hair2); border-radius: 8px; font: 400 13px/20px var(--mono); transition: border-color 140ms var(--ease); }
+input::placeholder { color: var(--ink3); }
+input:hover { border-color: var(--ink3); }
+input.short { max-width: 120px; }
+input.need { border-color: var(--critical); }
+.seg { display: inline-flex; flex-wrap: wrap; gap: 2px; padding: 2px; background: var(--step); border-radius: 8px; }
+.seg button { height: 32px; padding: 0 12px; border: 1px solid transparent; border-radius: 6px; background: none; color: var(--ink2); font: 400 13px/20px var(--sans); cursor: pointer; transition: background-color 140ms var(--ease), color 140ms var(--ease); }
+.seg button:hover { color: var(--ink); }
+.seg button[aria-pressed="true"] { background: var(--field); border-color: var(--hair); color: var(--ink); font-weight: 500; }
+.chk { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; line-height: 20px; color: var(--ink2); }
+.chk input { flex: none; width: 16px; height: 16px; margin: 2px 0 0; accent-color: var(--ink); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 32px; padding: 0 12px; border: 1px solid var(--hair2); border-radius: 8px; background: var(--field); color: var(--ink); font: 500 13px/20px var(--sans); text-decoration: none; cursor: pointer; transition: background-color 140ms var(--ease), transform 140ms var(--ease); }
+.btn:hover { background: var(--step); }
+.btn:active { transform: scale(.98); }
+
+/* Starting points */
+.choices { display: grid; gap: 2px; margin: 0 -12px; }
+.choice { display: grid; grid-template-columns: 16px 152px minmax(0, 1fr); gap: 2px 12px; padding: 8px 12px; border-radius: 8px; cursor: pointer; transition: background-color 140ms var(--ease); }
+.choice:hover { background: var(--step); }
+.choice:has(input:checked) { background: var(--step); }
+.choice input { width: 16px; height: 16px; margin: 2px 0 0; accent-color: var(--ink); }
+.choice b { font-size: 14px; line-height: 20px; font-weight: 500; }
+.choice span { font-size: 13px; line-height: 20px; color: var(--ink2); }
+
+/* Fine-tune */
+details.tune { border-top: 1px solid var(--hair); padding: 24px 0 0; }
+details.tune > summary { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; cursor: pointer; font-size: 16px; line-height: 24px; font-weight: 500; }
+details.tune > summary small { font-size: 13px; font-weight: 400; color: var(--ink3); }
+.tunebody { display: grid; gap: 16px; padding: 20px 0 24px; }
+.meter { position: relative; display: flex; gap: 2px; width: 100%; max-width: 480px; height: 12px; }
+.meter i { height: 12px; }
+.meter i:first-child { border-radius: 4px 0 0 4px; }
+.meter i:last-of-type { border-radius: 0 4px 4px 0; }
+#mModel { background: var(--ink); } #mMargin { background: var(--ink3); } #mFree { background: var(--step); }
+.meter.over #mModel { background: var(--critical); }
+#mLimit { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--ink); }
+.fittext { font-size: 13px; line-height: 20px; color: var(--ink2); max-width: 60ch; }
+.fittext.over { color: var(--critical); }
+
+/* Options */
+.tools { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 12px; align-items: center; margin-bottom: 8px; }
+.searchbox { position: relative; display: flex; align-items: center; }
+.searchbox svg { position: absolute; left: 12px; color: var(--ink3); pointer-events: none; }
+.searchbox input { padding-left: 36px; font-family: var(--sans); font-size: 14px; }
+.tally { font: 400 12px/16px var(--mono); color: var(--ink3); white-space: nowrap; }
+#topicSelect { width: 100%; height: 36px; padding: 0 8px; background: var(--field); color: var(--ink); border: 1px solid var(--hair2); border-radius: 8px; font: 400 14px/20px var(--sans); grid-column: 1 / -1; }
+.list { container-type: inline-size; }
+.cat { padding-top: 16px; }
+.cat > h2 { font-size: 20px; line-height: 28px; padding: 16px 0 4px; }
+.blurb { color: var(--ink2); max-width: 65ch; padding-bottom: 8px; }
+.lvgroup > h3 { display: flex; gap: 8px; align-items: baseline; padding: 16px 0 8px; font-size: 13px; line-height: 20px; color: var(--ink3); }
+.lvgroup > h3 span { font: 400 12px/16px var(--mono); }
+.list.flat .lvgroup > h3 { display: none; }
+.opt { display: grid; grid-template-columns: minmax(0, 1fr) 216px; gap: 8px 24px; padding: 16px 12px; margin: 0 -12px; border-top: 1px solid var(--hair); border-radius: 0; transition: background-color 140ms var(--ease); }
+.opt.on { background: var(--step); border-top-color: transparent; border-radius: 8px; }
+.opt .body { display: grid; gap: 8px; min-width: 0; }
+.flags { font-size: 14px; line-height: 20px; font-weight: 500; overflow-wrap: anywhere; }
+.flags code { font-weight: 500; }
+.val { font: 400 13px/20px var(--mono); color: var(--ink3); }
+.used { display: block; font: 400 12px/16px var(--sans); color: var(--ink3); padding-top: 4px; }
+.plain { font-size: 14px; line-height: 22px; max-width: 65ch; }
+.tip { font-size: 14px; line-height: 22px; color: var(--ink2); max-width: 65ch; }
+.tip b { font-weight: 500; color: var(--ink); }
+.meta { display: flex; flex-wrap: wrap; gap: 4px 16px; font: 400 12px/16px var(--mono); color: var(--ink3); }
+.meta div { display: flex; gap: 8px; min-width: 0; }
+.meta dt { font-family: var(--sans); }
+.meta dd { overflow-wrap: anywhere; }
+.opt details { font-size: 13px; line-height: 20px; color: var(--ink3); }
+.opt summary { cursor: pointer; width: fit-content; }
+.opt summary:hover { color: var(--ink); }
+pre.off { margin: 8px 0 0; padding: 12px; background: var(--step); border-radius: 8px; color: var(--ink2); font-size: 12px; line-height: 20px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.opt.on pre.off { background: var(--field); }
+.ctl { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; align-content: flex-start; }
+.ctl input { flex: 1 1 100%; height: 32px; }
+.ctl .negb { font-family: var(--mono); font-weight: 400; font-size: 12px; max-width: 100%; height: auto; min-height: 32px; overflow-wrap: anywhere; }
+.noadd { font-size: 13px; line-height: 20px; color: var(--ink3); text-align: right; }
+@container (max-width: 600px) {
+  .opt { grid-template-columns: minmax(0, 1fr); }
+  .ctl { justify-content: flex-start; }
+  .ctl input { flex-basis: 160px; }
+  .noadd { text-align: left; }
+}
+#none { padding: 24px 0; color: var(--ink2); }
+
+/* Guide */
+.prose { display: grid; gap: 8px; max-width: 65ch; }
+.rules { display: grid; gap: 12px; }
+.rules b { font-weight: 500; }
+.rules code, .prose code { font-size: 13px; }
+.gloss { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 32px; font-size: 14px; }
+.gloss dt { font-weight: 500; }
+.gloss dd { color: var(--ink2); }
+.tablewrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; line-height: 20px; }
+th, td { text-align: left; padding: 8px 16px 8px 0; border-bottom: 1px solid var(--hair); vertical-align: top; }
+th { color: var(--ink3); font-weight: 500; white-space: nowrap; }
+td code { white-space: nowrap; }
+
+/* Terminal column */
+.panel { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; background: var(--term); color: var(--term-ink); }
+.wires { display: flex; flex: none; height: 12px; margin-top: 16px; }
+.wires span { flex: 1; position: relative; transition: transform 320ms var(--ease), opacity 320ms var(--ease); opacity: .6; background: linear-gradient(var(--red), var(--red)) 0 2px / 100% 2px no-repeat, linear-gradient(var(--steel), var(--steel)) 0 8px / 100% 2px no-repeat; }
+.wires span:first-child { transform-origin: left; transform: scaleX(.84); }
+.wires span:last-child { transform-origin: right; transform: scaleX(.84); }
+.wires span::after { content: ""; position: absolute; top: 0; width: 6px; height: 12px; background: var(--steel); }
+.wires span:first-child::after { right: 0; } .wires span:last-child::after { left: 0; }
+.wires.linked span { transform: scaleX(1); opacity: 1; }
+.pbody { flex: 1; min-height: 0; overflow-y: auto; padding: 16px 24px 24px; display: grid; gap: 20px; align-content: start; }
+.phead { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+.phead h2 { font-size: 16px; line-height: 24px; }
+#statusText { font-size: 13px; line-height: 20px; color: var(--term-ink2); margin-top: 2px; }
+#statusText.good { color: var(--term-ok); } #statusText.fail { color: var(--term-bad); }
+.closep { background: none; border: 0; color: var(--term-ink2); font: 400 13px/20px var(--sans); cursor: pointer; padding: 0; }
+.cmd { display: grid; gap: 8px; }
+.ln { display: grid; grid-template-columns: minmax(0, 1fr) 24px; gap: 0 8px; position: relative; padding: 4px 8px; margin: 0 -8px; border-radius: 6px; }
+.ln:not(.head) { padding-left: 24px; }
+.ln .t { display: block; font: 400 13px/20px var(--mono); color: var(--term-ink); white-space: pre-wrap; overflow-wrap: anywhere; }
+.ln .t .f { color: var(--term-ink2); }
+.ln .nt { grid-column: 1; justify-self: start; padding: 0; border: 0; background: none; color: var(--term-ink3); font: 400 12px/16px var(--sans); text-align: left; cursor: pointer; user-select: none; -webkit-user-select: none; transition: color 140ms var(--ease); }
+.ln .nt:hover { color: var(--term-ink); text-decoration: underline; text-underline-offset: 2px; }
+.ln .nt.static { cursor: default; } .ln .nt.static:hover { color: var(--term-ink3); text-decoration: none; }
+.ln .x { grid-column: 2; grid-row: 1; display: flex; align-items: center; justify-content: center; width: 24px; height: 20px; padding: 0; border: 0; border-radius: 4px; background: none; color: var(--term-ink3); cursor: pointer; user-select: none; -webkit-user-select: none; transition: color 140ms var(--ease), background-color 140ms var(--ease); }
+.ln .x:hover { color: var(--term-ink); background: var(--term-step); }
+.ln.ghost .t { color: var(--term-ink3); user-select: none; -webkit-user-select: none; }
+.ln.ghost .nt { color: var(--term-ink); text-decoration: underline; text-underline-offset: 2px; }
+.ln.fresh::before { content: ""; position: absolute; inset: 0; border-radius: 6px; background: var(--red); opacity: 0; pointer-events: none; animation: fresh 720ms var(--ease) 1; }
+@keyframes fresh { from { opacity: .28; } to { opacity: 0; } }
+.checks { display: grid; gap: 8px; font-size: 13px; line-height: 20px; }
+.checks li { display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: 8px; color: var(--term-ink2); }
+.checks svg { margin-top: 2px; }
+.checks .ok svg { color: var(--term-ok); } .checks .warn svg { color: var(--term-warn); } .checks .bad svg { color: var(--term-bad); }
+.checks .bad { color: var(--term-ink); }
+.next { display: grid; gap: 8px; padding-top: 16px; border-top: 1px solid var(--term-hair); font-size: 13px; line-height: 20px; color: var(--term-ink2); }
+.next h3 { font-size: 13px; line-height: 20px; color: var(--term-ink); }
+.next ol { display: grid; gap: 4px; counter-reset: s; }
+.next ol li { display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: 8px; counter-increment: s; }
+.next ol li::before { content: counter(s); font-family: var(--mono); color: var(--term-ink3); }
+.next code { font-size: 12px; color: var(--term-ink); overflow-wrap: anywhere; }
+.acts { flex: none; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 16px 24px; border-top: 1px solid var(--term-hair); }
+.acts .btn { height: 36px; background: var(--term-step); border-color: var(--term-hair); color: var(--term-ink); }
+.acts .btn:hover { background: var(--term-hair); }
+.acts #copy { grid-column: 1 / -1; height: 44px; background: var(--term-ink); border-color: var(--term-ink); color: var(--term); font-size: 14px; }
+.acts #copy:hover { background: #fff; }
+.minor { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-top: 4px; font-size: 13px; line-height: 20px; color: var(--term-ink2); }
+.minor label { display: flex; gap: 8px; align-items: center; cursor: pointer; }
+.minor input { width: 16px; height: 16px; margin: 0; accent-color: var(--term-ink); }
+.minor button { padding: 0; border: 0; background: none; color: var(--term-ink2); font: 400 13px/20px var(--sans); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+.minor button:hover { color: var(--term-ink); }
+
+/* Command bar on smaller screens */
+.bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; align-items: center; gap: 8px; padding: 8px 16px; background: var(--term); color: var(--term-ink); }
+.bar p { flex: 1; min-width: 0; font-size: 13px; line-height: 20px; color: var(--term-ink2); }
+.bar .btn { flex: none; height: 36px; background: var(--term-step); border-color: var(--term-hair); color: var(--term-ink); }
+.bar #copyBar { background: var(--term-ink); border-color: var(--term-ink); color: var(--term); }
+
+@media (max-width: 1179px) {
+  .shell { grid-template-columns: 248px minmax(0, 1fr); }
+  .side { padding-bottom: 96px; }
+  body.command-open { overflow: hidden; }
+  .only-small { display: flex !important; }
+  .panel { position: fixed; inset: 0; z-index: 30; height: auto; visibility: hidden; opacity: 0; transform: translateY(12px); transition: opacity 240ms var(--ease), transform 240ms var(--ease), visibility 240ms; }
+  .panel.open { visibility: visible; opacity: 1; transform: none; transition: opacity 240ms var(--ease), transform 240ms var(--ease), visibility 0s; }
+  .view { padding-bottom: 112px; }
+}
+@media (max-width: 859px) {
+  .shell { display: block; }
+  .side { position: static; height: auto; overflow: visible; border-right: 0; border-bottom: 1px solid var(--hair); padding: 16px 16px 12px; }
+  .brand { padding: 0 0 12px; }
+  .nav { flex-direction: row; gap: 4px; }
+  .nav > button { flex: 1; justify-content: center; }
+  .navgroup, .navlabel { display: none; }
+  .only-narrow { display: flex !important; }
+  select.only-narrow { display: block !important; }
+  .view { padding: 24px 16px 112px; }
+  h1 { font-size: 24px; line-height: 32px; }
+  .setting { grid-template-columns: minmax(0, 1fr); }
+  .setting > label, .setting > .lbl { padding-top: 0; }
+  .choice { grid-template-columns: 16px minmax(0, 1fr); }
+  .choice span { grid-column: 2; }
+  .gloss { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="14" height="14" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+  <symbol id="i-ok" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-warn" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+</svg>
+
+<div class="shell">
+  <aside class="side">
+    <div class="brand">
+      <svg viewBox="0 0 20 20" aria-hidden="true"><path class="m1" d="M1 6h10V4h4v6h-4V8H1z"/><path class="m2" d="M19 14H9v2H5v-6h4v2h10z"/></svg>
+      Jumper Cables
+    </div>
+    <nav class="nav" aria-label="Pages">
+      <button type="button" data-view="setup">Setup</button>
+      <button type="button" class="only-narrow" data-view="start">Options</button>
+      <button type="button" data-view="guide">Guide</button>
+      <h2 class="navlabel">Options</h2>
+      <div class="navgroup">
+        <button type="button" data-view="start">Start here<span>%%N_S%%</span></button>
+        <button type="button" data-view="good">Good to know<span>%%N_U%%</span></button>
+        <button type="button" data-view="all">Every option<span>%%TOTAL%%</span></button>
+      </div>
+      <h2 class="navlabel">By topic</h2>
+      <div class="navgroup">%%NAV%%</div>
+    </nav>
+  </aside>
+
+  <main>
+    <section class="view" id="v-setup">
+      <header>
+        <h1>Jump-start a local model in the llama.cpp web UI</h1>
+        <p class="sub">%%HERO_NOTE%%</p>
+      </header>
+
+      <div class="group">
+        <h2>Your computer</h2>
+        <div class="setting"><span class="lbl">System</span>
+          <div class="ctrl"><div class="seg" id="os" role="group" aria-label="Operating system">
+            <button type="button" data-v="linux">Linux</button><button type="button" data-v="mac">macOS</button><button type="button" data-v="win">Windows</button>
+          </div></div>
+        </div>
+        <div class="setting"><label for="bin">llama-server path</label>
+          <div class="ctrl">
+            <input id="bin" type="text" placeholder="llama-server" spellcheck="false" autocomplete="off">
+            <p class="help">Leave blank if it's already on your PATH. <span id="install"></span></p>
+            <label class="chk" id="libsWrap"><input id="libs" type="checkbox"><span>It's an unzipped release with its own libraries, so run it from that folder</span></label>
+          </div>
+        </div>
+      </div>
+
+      <div class="group">
+        <h2>Your model</h2>
+        <div class="setting"><span class="lbl">Where it is</span>
+          <div class="ctrl"><div class="seg" id="modelMode" role="group" aria-label="Model source">
+            <button type="button" data-v="file">File on this computer</button><button type="button" data-v="hf">Hugging Face</button>
+          </div></div>
+        </div>
+        <div class="setting" id="fileWrap"><label for="model">Path to the .gguf file</label>
+          <div class="ctrl"><input id="model" type="text" placeholder="/path/to/your-model.gguf" spellcheck="false" autocomplete="off"></div>
+        </div>
+        <div class="setting" id="hfWrap"><label for="hf">Repo name</label>
+          <div class="ctrl"><input id="hf" type="text" placeholder="org/model-GGUF:Q4_K_M" spellcheck="false" autocomplete="off">
+          <p class="help">Downloads on the first run, then stays cached</p></div>
+        </div>
+      </div>
+
+      <div class="group">
+        <h2>Starting point</h2>
+        <div class="choices" id="presets" role="radiogroup" aria-label="Starting point">
+          <label class="choice"><input type="radio" name="preset" value="mine" id="p-mine"><b id="mineName">My setup</b><span>Restores your saved setup.</span></label>
+          <label class="choice"><input type="radio" name="preset" value="auto" id="p-auto"><b>Just start it</b><span>Leaves everything automatic. The server picks layers and context to fit your GPU.</span></label>
+          <label class="choice"><input type="radio" name="preset" value="gpu" id="p-gpu"><b>All on GPU</b><span>Every layer on the GPU, with the largest context that fits. Usually the fastest.</span></label>
+          <label class="choice"><input type="radio" name="preset" value="long" id="p-long"><b>Long memory</b><span>Asks for a 32K context. On a small GPU, some layers may move to the CPU.</span></label>
+          <label class="choice"><input type="radio" name="preset" value="cpu" id="p-cpu"><b>CPU only</b><span>Runs without the GPU. Slower, but works on any machine with enough RAM.</span></label>
+          <label class="choice"><input type="radio" name="preset" value="locked" id="p-locked"><b>Locked down</b><span>Only this computer connects, and pages from other sites are blocked, including Test connection here.</span></label>
+          <label class="choice"><input type="radio" name="preset" value="readonly" id="p-readonly"><b>Read-only tools</b><span>The model can search and read files your account can read, including private ones. It can't change anything. Experimental.</span></label>
+          <label class="choice"><input type="radio" name="preset" value="share" id="p-share"><b>Share on my network</b><span>Other devices can connect, protected by an API key you make up.</span></label>
+        </div>
+      </div>
+
+      <details class="tune" id="tune">
+        <summary>Fine-tune <small>Context window, GPU, thinking, port and whether it fits</small></summary>
+        <div class="tunebody">
+          <div class="setting"><label for="ctx">Context window</label>
+            <div class="ctrl">
+              <div class="seg" id="ctxQuick" role="group" aria-label="Context size">
+                <button type="button" data-v="">Auto</button><button type="button" data-v="8192">8K</button><button type="button" data-v="16384">16K</button><button type="button" data-v="32768">32K</button><button type="button" data-v="65536">64K</button><button type="button" data-v="0">Model max</button>
+              </div>
+              <input id="ctx" class="short" type="number" min="0" step="1024" placeholder="Tokens" inputmode="numeric">
+              <p class="help">1,000 tokens is about 750 words. Bigger uses more memory.</p>
+            </div>
+          </div>
+          <div class="setting"><span class="lbl">GPU layers</span>
+            <div class="ctrl"><div class="seg" id="ngl" role="group" aria-label="GPU layers"><button type="button" data-v="">Auto</button><button type="button" data-v="all">All</button><button type="button" data-v="0">None</button></div></div>
+          </div>
+          <div class="setting"><span class="lbl">Auto-sizing</span>
+            <div class="ctrl"><div class="seg" id="fit" role="group" aria-label="Auto-sizing"><button type="button" data-v="">Default</button><button type="button" data-v="on">On</button><button type="button" data-v="off">Off</button></div>
+            <p class="help">Adjusts what you left unset so it fits. With it off, too large a context can stop the server at startup.</p></div>
+          </div>
+          <div class="setting"><span class="lbl">Thinking</span>
+            <div class="ctrl"><div class="seg" id="rea" role="group" aria-label="Thinking"><button type="button" data-v="">Auto</button><button type="button" data-v="on">On</button><button type="button" data-v="off">Off</button></div></div>
+          </div>
+          <div class="setting"><label for="temp">Temperature</label>
+            <div class="ctrl"><input id="temp" class="short" type="number" min="0" max="2" step="0.05" placeholder="0.80" inputmode="decimal"><p class="help">How varied the wording gets. Lower is more predictable.</p></div>
+          </div>
+          <div class="setting"><label for="port">Port</label>
+            <div class="ctrl"><input id="port" class="short" type="number" min="1" max="65535" placeholder="8080" inputmode="numeric"></div>
+          </div>
+          <div class="setting"><label for="np">Simultaneous chats</label>
+            <div class="ctrl"><input id="np" class="short" type="number" min="1" placeholder="Auto" inputmode="numeric"></div>
+          </div>
+          <div class="setting"><span class="lbl">Who can connect</span>
+            <div class="ctrl"><div class="seg" id="host" role="group" aria-label="Who can connect"><button type="button" data-v="">This computer</button><button type="button" data-v="0.0.0.0">My whole network</button></div></div>
+          </div>
+          <div class="setting" id="keyWrap"><label for="apikey">API key</label>
+            <div class="ctrl"><input id="apikey" type="text" placeholder="Make up a long random key" spellcheck="false" autocomplete="off"></div>
+          </div>
+          <div class="setting" id="detachWrap"><span class="lbl">In the background</span>
+            <div class="ctrl"><label class="chk"><input id="detach" type="checkbox"><span>Keep running after I close the terminal</span></label></div>
+          </div>
+          <div class="setting"><span class="lbl">Will it fit?</span>
+            <div class="ctrl">
+              <div style="display:flex;flex-wrap:wrap;gap:12px;width:100%">
+                <div style="flex:1 1 120px;max-width:200px"><label class="help" for="vram">GPU memory, GB</label><input id="vram" type="number" min="0" step="1" placeholder="6" inputmode="decimal"></div>
+                <div style="flex:1 1 120px;max-width:200px"><label class="help" for="size">Model file, GB</label><input id="size" type="number" min="0" step="0.1" placeholder="1.6" inputmode="decimal"></div>
+              </div>
+              <div class="meter" id="meter" hidden aria-hidden="true"><i id="mModel"></i><i id="mMargin"></i><i id="mFree"></i><b id="mLimit" hidden></b></div>
+              <p class="fittext" id="fitText"></p>
+            </div>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <section class="view" id="v-options" hidden>
+      <header>
+        <h1 id="optTitle">Start here</h1>
+        <p class="sub" id="optBlurb"></p>
+      </header>
+      <div class="tools">
+        <div class="searchbox"><svg class="i" aria-hidden="true"><use href="#i-search"/></svg><input id="q" type="search" placeholder="Search all %%TOTAL%% options" aria-label="Search all options" autocomplete="off"></div>
+        <span class="tally" id="tally" aria-live="polite">%%TOTAL%% of %%TOTAL%%</span>
+        <select class="only-narrow" id="topicSelect" aria-label="Choose a topic"></select>
+      </div>
+      <div class="list" id="partsbin">
+        <p id="none" hidden>No options match. Try a different word, such as memory or security.</p>
+        %%SECTIONS%%
+      </div>
+    </section>
+
+    <section class="view" id="v-guide" hidden>
+      <header>
+        <h1>Guide</h1>
+        <p class="sub">Most of these %%TOTAL%% options exist for rare situations, and the defaults are sensible. Learn the %%START_COUNT%% in Start here, then look up the rest when something specific bothers you, like slow replies, running out of memory or wanting tools.</p>
+      </header>
+      %%PRIVATE_BLOCKS%%
+      <div class="group">
+        <h2>How options work</h2>
+        <ul class="rules">
+          <li><b>Most need a restart.</b> Options are read when the server starts.</li>
+          <li><b>Many have two forms.</b> Add the flag to the command, or set its environment variable. If you do both, the flag wins.</li>
+          <li><b>Several names can mean one option.</b> <code>-c</code> and <code>--ctx-size</code> do the same thing.</li>
+          <li><b>On/off options often have a <code>--no-</code> form.</b> <code>--no-ui</code> turns off <code>--ui</code>.</li>
+          <li><b>Sampling options are starting values.</b> The chat page's Settings or an app's request can override them without a restart.</li>
+          <li><b>The model sets some limits.</b> A flag can't add vision to a text-only model or push context past its maximum.</li>
+        </ul>
+      </div>
+      <div class="group">
+        <h2>Words you'll see</h2>
+        <dl class="gloss">%%GLOSSARY%%</dl>
+      </div>
+      <div class="group">
+        <h2>About this page</h2>
+        <div class="prose">
+          <p>This page builds the command in your browser, and nothing you type gets sent anywhere. Test connection only contacts the server on your own computer. Fonts load from Google Fonts.</p>
+          <p>Option names, defaults, environment variables and official text come from <code>llama-server --help</code> for version 0.6.0-dev, build 11564, commit 08ffba21e. It covers %%FLAGCOUNT%% flag spellings. Other builds differ, so check your own <code>--help</code> if a flag gets rejected. The plain-English text was written for this project and hasn't been tested option by option.</p>
+          <p>llama.cpp is MIT licensed, copyright The ggml authors. Icons are from <a href="https://lucide.dev">Lucide</a> (ISC, with Feather-derived icons under MIT). Design rules follow <a href="https://github.com/heydamir/unslop">unslop</a> by Damir Sokolovsky, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>, adapted for this layout. Upstream license notices are included in this page's source. <a href="https://github.com/CSI-Platform/jumper-cables">Jumper Cables on GitHub</a>.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <aside class="panel" id="panel" aria-label="Your command">
+    <div class="wires" id="wires" aria-hidden="true"><span></span><span></span></div>
+    <div class="pbody">
+      <div>
+        <div class="phead"><h2 id="commandTitle">Your command</h2><button type="button" class="closep only-small" id="closePanel">Close</button></div>
+        <p id="statusText" role="status"></p>
+      </div>
+      <div class="cmd" id="cmd" tabindex="0" aria-label="The command, one line per option"></div>
+      <ul class="checks" id="checks"></ul>
+      <div class="next">
+        <h3>After you copy it</h3>
+        <ol>
+          <li><span>Paste it into a terminal and press Enter</span></li>
+          <li><span>Wait for it to say <code>listening on</code></span></li>
+          <li><span>Open the web UI and start chatting</span></li>
+        </ol>
+        <p id="stop"></p>
+      </div>
+    </div>
+    <div class="acts">
+      <button type="button" class="btn" id="copy"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg><span id="copyLabel">Copy command</span></button>
+      <a class="btn" id="open" href="http://127.0.0.1:8080/" target="_blank" rel="noopener"><svg class="i" aria-hidden="true"><use href="#i-link"/></svg>Open web UI</a>
+      <button type="button" class="btn" id="test">Test connection</button>
+      <div class="minor">
+        <label><input id="oneLine" type="checkbox">One line</label>
+        <button type="button" id="reset">Start over</button>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<div class="bar only-small">
+  <p id="barText"></p>
+  <button type="button" class="btn" id="showCmd" aria-expanded="false" aria-controls="panel">Show command</button>
+  <button type="button" class="btn" id="copyBar"><span id="copyBarLabel">Copy</span></button>
+</div>
+
+<script type="application/json" id="profile">%%PROFILE_JSON%%</script>
+<script>
+%%SCRIPT%%
+</script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+{
+  "name": "jumper-cables-acceptance",
+  "private": true,
+  "scripts": { "test": "node acceptance.cjs" },
+  "devDependencies": { "playwright": "1.65.0" }
+}
