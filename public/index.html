@@ -915,12 +915,26 @@ from the internet)</pre></details></div><div class="ctl" data-key="--fim-qwen-30
   }
 
   // ---------- Pre-flight ----------
+  function loopbackOnly(host) {
+    if (!host) return true;
+    return host.split(",").every(function (address) {
+      address = address.trim().toLowerCase();
+      if (address === "localhost" || address === "::1") return true;
+      var octets = address.split(".");
+      return octets.length === 4 && octets[0] === "127" && octets.every(function (octet) {
+        return /^\d{1,3}$/.test(octet) && Number(octet) <= 255;
+      });
+    });
+  }
   function modelSource() {
-    return Object.keys(S.opts).filter(function (k) { return k === "-m" || k === "-hf" || k === "-mu" || k === "-dr" || k === "--models-dir" || /-default$|^--fim-|-spec$/.test(k); });
+    return Object.keys(S.opts).filter(function (k) {
+      return reg[k] && (k === "-m" || k === "-hf" || k === "-mu" || k === "-dr" || k === "--models-dir" || reg[k].card.closest(".cat").id === "cat-presets");
+    });
   }
   function checks() {
-    var L = [], src = modelSource(), tools = getOpt("--tools"), agent = !!S.opts["-ag"], runtime = getOpt("--tools-runtime");
-    var host = getOpt("--host"), loop = !host || /^(127\.|localhost$|::1$)/.test(host);
+    var L = [], src = modelSource(), tools = getOpt("--tools"), agent = !!S.opts["-ag"] && !S.opts["-ag"].neg, runtime = getOpt("--tools-runtime");
+    var externalRuntime = runtime && runtime !== "none";
+    var host = getOpt("--host"), loop = loopbackOnly(host);
     var hasKey = getOpt("--api-key") || getOpt("--api-key-file");
     if (!src.length) L.push(["bad", "Add a model. The server has nothing to run without one."]);
     else if (src.length > 1) L.push(["warn", "More than one model source is set: " + src.join(", ") + ". Keep only one."]);
@@ -931,8 +945,8 @@ from the internet)</pre></details></div><div class="ctl" data-key="--fim-qwen-30
     else L.push(["ok", "Only this computer can connect"]);
     if (getOpt("--api-key")) L.push(["warn", "The API key is in the command, so it can land in shell history. --api-key-file avoids that."]);
     var danger = agent || /all|exec_shell_command|write_file|edit_file/.test(tools);
-    if (danger && !runtime) L.push(["bad", "Shell or write tools would run directly on your system with your permissions. Add --tools-runtime with a container first."]);
-    else if (tools || agent) L.push(["warn", "Tools are on. They're experimental and can read what your account can read" + (runtime ? ", inside the runtime you set." : ".")]);
+    if (danger && !externalRuntime) L.push(["bad", "Shell or write tools would run directly on your system with your permissions. Add --tools-runtime with a container first."]);
+    else if (tools || agent) L.push(["warn", "Tools are on. They're experimental and can read what your account can read" + (externalRuntime ? ", inside the runtime you set." : ".")]);
     if (S.opts["-fit"] && getOpt("-fit") === "off") L.push(["warn", "Auto-sizing is off, so settings that don't fit will stop the server at startup."]);
     if (S.opts["--ui"] && S.opts["--ui"].neg) L.push(["warn", "The web UI is turned off, so Open web UI won't show a chat page."]);
     if (S.detach && S.os !== "win") L.push(["ok", "Output goes to ~/llama-server.log while it runs in the background"]);
@@ -1039,7 +1053,7 @@ from the internet)</pre></details></div><div class="ctl" data-key="--fim-qwen-30
     setVal("model", getOpt("-m")); setVal("hf", getOpt("-hf"));
     setVal("ctx", getOpt("-c")); setVal("temp", getOpt("--temp")); setVal("port", getOpt("--port")); setVal("np", getOpt("-np")); setVal("apikey", getOpt("--api-key"));
     press("ctxQuick", getOpt("-c")); press("ngl", getOpt("-ngl")); press("fit", getOpt("-fit")); press("rea", getOpt("-rea"));
-    var h = getOpt("--host"), loop = /^(127\.|localhost$|::1$)/.test(h); press("host", loop ? "" : h);
+    var h = getOpt("--host"), loop = loopbackOnly(h); press("host", loop ? "" : h);
     $("keyWrap").hidden = !(h && !loop) && !getOpt("--api-key");
     $("libs").checked = !!S.libs; $("libsWrap").hidden = !(S.os === "linux" && S.bin.indexOf("/") >= 0);
     $("detach").checked = !!S.detach; $("detachWrap").hidden = S.os === "win"; $("oneLine").checked = !!S.oneLine;

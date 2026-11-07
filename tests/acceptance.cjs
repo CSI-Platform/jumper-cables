@@ -178,6 +178,46 @@ const results = [];
     assert.doesNotMatch(await preview.locator('body').innerText(),/%%[A-Z_]+%%/);
     await preview.close();
   });
+  await check('mixed loopback and network bind addresses require authentication',async()=>{
+    await page.setViewportSize({width:1440,height:1000});
+    await page.locator('.nav button[data-view="setup"]').click();
+    await page.locator('#reset').click(); await page.locator('#model').fill('/models/example.gguf');
+    await page.locator('.nav button[data-view="cat-network"]').click();
+    const host=page.locator('.ctl[data-key="--host"]');
+    await host.locator('input').fill('127.0.0.1,0.0.0.0'); await host.locator('.add').click();
+    assert.match(await page.locator('#checks').innerText(),/no API key/);
+    assert.doesNotMatch(await page.locator('#checks').innerText(),/Only this computer/);
+    await host.locator('input').fill('127.0.0.1, ::1');
+    assert.match(await page.locator('#checks').innerText(),/Only this computer/);
+    await host.locator('input').fill('127.example.com');
+    assert.match(await page.locator('#checks').innerText(),/no API key/);
+    await host.locator('.add').click();
+  });
+  await check('speculative decoding alone does not count as a model',async()=>{
+    await page.locator('#reset').click();
+    await page.locator('.nav button[data-view="cat-spec"]').click();
+    await page.locator('.ctl[data-key="--spec-default"] .add').click();
+    assert.match(await page.locator('#statusText').innerText(),/Add a model/);
+    await page.locator('.nav button[data-view="cat-presets"]').click();
+    await page.locator('.ctl[data-key="--fim-qwen-7b-spec"] .add').click();
+    assert.match(await page.locator('#statusText').innerText(),/Ready/);
+    assert.doesNotMatch(await page.locator('#checks').innerText(),/More than one model source/);
+  });
+  await check('disabling agent mode does not report shell tools as enabled',async()=>{
+    await page.locator('.nav button[data-view="cat-tools"]').click();
+    const agent=page.locator('.ctl[data-key="-ag"]'); await agent.locator('.negb').click();
+    assert.match(await command(),/--no-agent/);
+    assert.doesNotMatch(await page.locator('#checks').innerText(),/Shell or write tools|Tools are on/);
+    await agent.locator('.add').click();
+    assert.match(await page.locator('#checks').innerText(),/Shell or write tools/);
+  });
+  await check('an explicit host runtime still warns before enabling shell tools',async()=>{
+    const runtime=page.locator('.ctl[data-key="--tools-runtime"]');
+    await runtime.locator('input').fill('none'); await runtime.locator('.add').click();
+    assert.match(await page.locator('#checks').innerText(),/Shell or write tools/);
+    await runtime.locator('input').fill('docker:example');
+    assert.doesNotMatch(await page.locator('#checks').innerText(),/Shell or write tools/);
+  });
   await check('no JavaScript errors',async()=>assert.deepEqual(errors,[]));
   await browser.close();
   fs.writeFileSync(path.join(ARTIFACTS,'results.json'),JSON.stringify(results,null,2));
