@@ -46,8 +46,11 @@ or start a server on your computer.
 ## Privacy
 
 Command generation happens in your browser; the app does not upload the model
-paths or settings you enter. Settings, including any API key you enter, are saved
-in browser local storage. **Start over** restores the default settings.
+paths or settings you enter. Settings are saved in browser local storage, except entered API keys and Hugging
+Face tokens. Those credentials stay in memory until reload; previously saved
+credentials are removed when the updated app loads. Literal credentials still
+appear in the generated/copied command: prefer `--api-key-file` for server keys
+and `HF_TOKEN` for Hugging Face access. **Start over** restores the default settings.
 
 **Test connection** contacts `127.0.0.1` on your selected port. Fonts load from
 Google Fonts. The page does not upload model files or start inference itself.

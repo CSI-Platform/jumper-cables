@@ -19,9 +19,21 @@
   function clone(o) { return JSON.parse(JSON.stringify(o)); }
   function start() { return clone((profile && profile.state) || BLANK); }
   var S = null;
-  function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* storage may be blocked */ } }
+  // Persist configuration, never literal credentials (including legacy aliases).
+  function withoutSecrets(state) {
+    var clean = clone(state);
+    ["--api-key", "-hft", "--hf-token"].forEach(function (k) { delete clean.opts[k]; });
+    return clean;
+  }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(withoutSecrets(S))); } catch (e) { /* storage may be blocked */ } }
   function load() {
-    try { var raw = localStorage.getItem(KEY); if (raw) { var p = JSON.parse(raw); if (p && p.opts) return p; } } catch (e) { /* use defaults */ }
+    try { var raw = localStorage.getItem(KEY); if (raw) { var p = JSON.parse(raw); if (p && p.opts) {
+      var clean = withoutSecrets(p);
+      // Clean old storage before rendering or restoring any entered credentials.
+      try { localStorage.setItem(KEY, JSON.stringify(clean)); }
+      catch (e) { localStorage.removeItem(KEY); }
+      return clean;
+    } } } catch (e) { /* use defaults */ }
     return start();
   }
   function setOpt(k, v) { if (v === "" || v === null || v === undefined) { delete S.opts[k]; } else { S.opts[k] = { v: String(v) }; } }
@@ -349,6 +361,8 @@
     if (S.opts[k] && !S.opts[k].neg) { if (v) S.opts[k] = { v: v }; else if (reg[k].optional) S.opts[k] = {}; else delete S.opts[k]; render(); }
   });
 
+  $("useKeyFile").addEventListener("click", function () { jump("--api-key-file"); });
+
   // ---------- Wiring: command column ----------
   $("cmd").addEventListener("click", function (e) {
     var b = e.target.closest("button"); if (!b) return;
@@ -500,7 +514,7 @@
   }
   window.JC = { state: function () { return S; }, build: build, set: function (s) { S = s; render(); }, preset: applyPreset, checks: checks, show: show };
   if (window.claude && window.claude.hot) {
-    window.claude.hot.snapshot(function () { return S; });
+    window.claude.hot.snapshot(function () { return withoutSecrets(S); });
     if (window.claude.hot.ready) window.claude.hot.ready(boot); else boot(window.claude.hot.data || {});
   } else { boot({}); }
 })();

@@ -38,6 +38,35 @@ const results = [];
     assert.equal(await page.evaluate(()=>navigator.clipboard.readText()), await command());
     const before=await command(); await page.reload(); assert.equal(await command(),before);
   });
+  await check('credentials remain usable but never persist, including legacy migration',async()=>{
+    const before = await page.evaluate(()=>JSON.parse(JSON.stringify(JC.state())));
+    try {
+    await page.evaluate(()=>{
+      const s=JC.state();
+      s.opts['--api-key']={v:'dummy-api-secret'};
+      s.opts['-hft']={v:'dummy-hf-secret'};
+      s.opts['--api-key-file']={v:'/tmp/server-keys.txt'};
+      JC.set(s);
+    });
+    assert.match(await command(),/dummy-api-secret/);
+    assert.match(await command(),/dummy-hf-secret/);
+    assert.doesNotMatch(await page.evaluate(()=>localStorage.getItem('jumper-cables-state-v1')),/dummy-/);
+    await page.reload();
+    assert.doesNotMatch(await command(),/dummy-/);
+    assert.match(await command(),/--api-key-file \/tmp\/server-keys.txt/);
+    await page.evaluate(()=>{
+      const s=JC.state();
+      for(const k of ['--api-key','-hft','--hf-token']) s.opts[k]={v:'dummy-legacy-secret'};
+      localStorage.setItem('jumper-cables-state-v1',JSON.stringify(s));
+    });
+    await page.reload();
+    assert.doesNotMatch(await page.evaluate(()=>JSON.stringify(JC.state())),/dummy-/);
+    assert.doesNotMatch(await page.evaluate(()=>localStorage.getItem('jumper-cables-state-v1')),/dummy-/);
+    assert.match(await command(),/--api-key-file \/tmp\/server-keys.txt/);
+    await page.reload();
+    assert.doesNotMatch(await command(),/dummy-/);
+    } finally { await page.evaluate(s=>JC.set(s),before); }
+  });
   await check('POSIX command passes paths literally to a harmless executable',async()=>{
     const dir=fs.mkdtempSync(path.join(os.tmpdir(), 'jc-shell-'));
     try {

@@ -7,6 +7,20 @@ The live site and GitHub application source include all four maintenance fixes.
 All 22 acceptance checks pass, and the four fixes were also exercised on the
 production site. Current deployment and rollback details are recorded below.
 
+## Pending local update — credential persistence
+
+Implemented locally, not deployed: API keys and Hugging Face tokens are omitted
+from saved settings and hot-reload snapshots. Loading existing settings removes
+legacy credential entries before restoring state; ordinary settings and key-file
+paths still persist. The API-key field is masked and links to the key-file option.
+README privacy guidance now describes reload behavior and copied-command exposure.
+
+Validation: `python3 src/build.py` succeeds; all 23 browser acceptance checks pass
+with `CHROME_BIN=/opt/google/chrome/chrome npm --prefix tests test`. The credential
+regression check failed against the previous build and passed after rebuilding.
+It covers current-session command generation, persistence exclusion, legacy cleanup,
+repeated reloads, and preservation of key-file paths. Results: `/tmp/jc-release-Zi41Md`.
+
 ## Scope and destination
 
 Publish the existing static command builder, without adding model hosting or

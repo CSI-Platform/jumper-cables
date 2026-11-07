@@ -389,7 +389,8 @@ td code { white-space: nowrap; }
             <div class="ctrl"><div class="seg" id="host" role="group" aria-label="Who can connect"><button type="button" data-v="">This computer</button><button type="button" data-v="0.0.0.0">My whole network</button></div></div>
           </div>
           <div class="setting" id="keyWrap"><label for="apikey">API key</label>
-            <div class="ctrl"><input id="apikey" type="text" placeholder="Make up a long random key" spellcheck="false" autocomplete="off"></div>
+            <div class="ctrl"><input id="apikey" type="password" placeholder="Make up a long random key" spellcheck="false" autocomplete="off"></div>
+            <p class="help">Cleared on reload. The key still appears in your command. Prefer <button type="button" id="useKeyFile">an API key file</button> to keep it out of shell history.</p>
           </div>
           <div class="setting" id="detachWrap"><span class="lbl">In the background</span>
             <div class="ctrl"><label class="chk"><input id="detach" type="checkbox"><span>Keep running after I close the terminal</span></label></div>
