@@ -1,25 +1,27 @@
 # Jumper Cables release — 2026-11-06
 
-Status: the maintenance update is released to GitHub and https://jc.csi.run as of
-2026-11-06 at 17:12 Arizona time. The original launch was at 14:38 the same day.
+Status: credential-persistence fix published to GitHub and deployed to
+https://jc.csi.run on 2026-11-06 at approximately 19:06 Arizona time.
 
-The live site and GitHub application source include all four maintenance fixes.
-All 22 acceptance checks pass, and the four fixes were also exercised on the
-production site. Current deployment and rollback details are recorded below.
+## Credential persistence release
 
-## Pending local update — credential persistence
+Source commit: `56f06f1bc7a8431cf8d0bb24a1f4b127e7ceaeb0`.
+Cloudflare version: `e3cdfd44-8aa5-4029-80aa-dc55e7df6588`.
 
-Implemented locally, not deployed: API keys and Hugging Face tokens are omitted
-from saved settings and hot-reload snapshots. Loading existing settings removes
-legacy credential entries before restoring state; ordinary settings and key-file
-paths still persist. The API-key field is masked and links to the key-file option.
-README privacy guidance now describes reload behavior and copied-command exposure.
+API keys and Hugging Face tokens are omitted from saved settings and hot-reload
+snapshots. Loading existing settings removes legacy credential entries before
+restoring state; ordinary settings and key-file paths still persist. The API-key
+field is masked and links to the key-file option. README privacy guidance explains
+reload behavior and copied-command exposure.
 
 Validation: `python3 src/build.py` succeeds; all 23 browser acceptance checks pass
 with `CHROME_BIN=/opt/google/chrome/chrome npm --prefix tests test`. The credential
 regression check failed against the previous build and passed after rebuilding.
-It covers current-session command generation, persistence exclusion, legacy cleanup,
-repeated reloads, and preservation of key-file paths. Results: `/tmp/jc-release-Zi41Md`.
+Live Chrome checks passed for command generation, credential exclusion, legacy
+cleanup, preserved model settings, key-file navigation, and no JavaScript errors.
+Raw live HTML matches the committed asset, SHA-256
+`c010ca6221dac55980ebcf4012be1d6c0e25c33eaf1c931cf45c06e6475d7b7b`.
+Browser responses additionally include Cloudflare's analytics beacon.
 
 ## Scope and destination
 
@@ -135,8 +137,8 @@ No JavaScript errors were observed. No model was started or dependency upgraded.
 
 ## Current rollback target
 
-If this maintenance update needs to be reversed, roll Worker `jc` back to the
-previous working app version `57d9ac2b-5047-48e3-af35-435c78377922`
-(deployment `54065b9b-cfd0-497a-9de0-6b8844be22ac`). Preserve the DNS record
-and `jc.csi.run/*` route. The original placeholder version listed above is
-historical, not the recommended rollback target for this update.
+The previous working version is `18e10a13-accc-4679-8a06-e8ee3fb1b5a9`
+(deployment `9d93673a-fddb-43d3-baaa-2f97eb5865f6`). Preserve Worker `jc`, DNS,
+and the `jc.csi.run/*` route. Rolling back also restores the old credential-saving
+behavior; prefer a forward fix for credential-related defects. Removed browser
+credentials cannot be recovered by rollback and must be entered again.
