@@ -1,12 +1,11 @@
 # Jumper Cables release — 2026-11-06
 
-Status: released to GitHub and https://jc.csi.run on 2026-11-06 at 14:38 Arizona
-time, following user approval.
+Status: the maintenance update is released to GitHub and https://jc.csi.run as of
+2026-11-06 at 17:12 Arizona time. The original launch was at 14:38 the same day.
 
-The live site and GitHub application source remain at that verified release.
-Four subsequent maintenance fixes have passed 22 checks locally but are not yet
-published or deployed; see **Pending maintenance** below. The public release was
-validated with 18 checks. Documentation updates do not change the deployed app.
+The live site and GitHub application source include all four maintenance fixes.
+All 22 acceptance checks pass, and the four fixes were also exercised on the
+production site. Current deployment and rollback details are recorded below.
 
 ## Scope and destination
 
@@ -33,7 +32,7 @@ default branch contained only the initial README when inspected.
   panel. Restore navigation on close/resize and fully disable transitions when
   reduced motion is requested.
 
-## Validation
+## Initial-release validation
 
 - Python build succeeds with 257 option entries and 414 flag spellings. It checks
   for missing, extra, and duplicate option data and missing rendered flags.
@@ -67,7 +66,7 @@ default branch contained only the initial README when inspected.
 - GPU estimates are deliberately rough. Browser tests block external font
   requests and verify the fallback layout.
 
-## Published result
+## Initial release (superseded)
 
 - Source commit: `58598260cc2174eb71208bacd78848bfbf98b25c`.
 - Cloudflare version: `57d9ac2b-5047-48e3-af35-435c78377922`.
@@ -85,7 +84,7 @@ exactly. Local `main` was aligned to the published commit; the original local
 commits remain on `release/local-candidate-2026-11-06`. Future publishing should
 use the connected app or a terminal account with repository write access.
 
-## Recovery
+## Initial-release recovery
 
 Before this release, Worker `jc` served version
 `bb0f6155-98f3-4630-9985-e94d230228da` at 100%, deployment
@@ -94,10 +93,11 @@ Use the Worker's deployment history to roll back to it if necessary; do not
 delete the Worker, DNS record, or route. Keep the source commit for correction and
 redeployment. All local background services previously disabled remain disabled.
 
-## Pending maintenance — 2026-11-06
+## Current maintenance release — 2026-11-06
 
-Status: applied locally as commit `9dff50b`; not yet in GitHub's application source
-or deployed to the live site.
+Status: published to GitHub and deployed at 100% traffic after user approval.
+The original local fix commit was `9dff50b`; the published source commit is
+`1a29751866bb73d565d14354d5b5bbbf0816eeab`.
 
 Corrected four readiness/warning defects confirmed by browser regression checks:
 comma-separated host addresses now warn if any address is not loopback;
@@ -107,6 +107,22 @@ warning about executing shell/write tools directly on the host. Real model
 presets, multiple loopback addresses, and external runtime choices remain supported.
 
 All 22 browser acceptance checks pass, including the four new regressions. The
-Python build succeeds with the same 257-option catalog. The deployed asset was
-checked before this patch and still matched the release recorded above. No model
-was started, dependencies were not upgraded, and the public site was not changed.
+Python build succeeds with the same 257-option catalog. Production checks passed
+for all four fixes, command generation, desktop topics, tablet sidebar clearance,
+mobile focus containment/closing, and absence of private profiles or placeholders.
+No JavaScript errors were observed. No model was started or dependency upgraded.
+
+- Cloudflare version: `18e10a13-accc-4679-8a06-e8ee3fb1b5a9`.
+- Deployment: `9d93673a-fddb-43d3-baaa-2f97eb5865f6`, at 100% traffic.
+- Live HTML SHA-256: `a40cc94052d111cb18b6f6dc46f7def349ad28e610110e9195a9560380c11fcb`,
+  identical to the verified source asset.
+- Original local maintenance history is retained on
+  `release/local-maintenance-2026-11-06`.
+
+## Current rollback target
+
+If this maintenance update needs to be reversed, roll Worker `jc` back to the
+previous working app version `57d9ac2b-5047-48e3-af35-435c78377922`
+(deployment `54065b9b-cfd0-497a-9de0-6b8844be22ac`). Preserve the DNS record
+and `jc.csi.run/*` route. The original placeholder version listed above is
+historical, not the recommended rollback target for this update.

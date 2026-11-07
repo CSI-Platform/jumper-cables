@@ -41,7 +41,7 @@ or start a server on your computer.
   settings can block it even when the server works; try **Open web UI** directly.
 - Generated PowerShell/macOS command formatting is covered by browser checks,
   but execution on those operating systems has not been verified. See the
-  [release notes](RELEASE.md) for the validation scope and pending fixes.
+  [release notes](RELEASE.md) for the validation scope and deployed version.
 
 ## Privacy
 
@@ -122,7 +122,8 @@ To use an existing Chrome installation instead, set `CHROME_BIN` to its executab
 when running the tests. `JC_ARTIFACT_DIR` optionally selects the screenshot and
 result directory; the default is a temporary directory. Tests cover command
 generation, copy/persistence, presets, search, option editing, port validation,
-memory estimates, simulated connection results, and desktop/tablet/mobile layouts.
+memory estimates, network/tool warnings, model readiness, simulated connection
+results, and desktop/tablet/mobile layouts.
 They do not launch llama.cpp or execute PowerShell/macOS commands.
 
 ## Credits
