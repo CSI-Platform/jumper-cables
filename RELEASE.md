@@ -1,4 +1,33 @@
-# Jumper Cables release — 2026-11-06
+# Jumper Cables release — 2026-11-09
+
+Status: the four static `llama-server` commands are on GitHub `main` and deployed
+to https://jc.csi.run on 2026-11-09.
+
+## Command catalog release
+
+Source commit: `69775c6a127d77a30c28549b636f0c806326e913` (merge of pull request 1).
+Cloudflare version: `f38a05d5-ba62-45d1-b708-c70b09a927af`.
+Deployment: `f859b20e-55e7-4686-abb6-e68a0eba66f2`, at 100% traffic.
+Worker: `jc`. Route: `jc.csi.run/*` in zone `csi.run`.
+
+The live page shows the heading "How do I start a local llama.cpp server?" and a
+`llama-server` command in the HTML before the script tag. https://jc.csi.run/llms.txt
+returns the same four commands as `public/llms.txt`.
+
+Raw live HTML SHA-256:
+`d61c6d2506e2e5a7437163555930efbaec95541d3bf80054c7f7b41ae4051abe`.
+Committed `public/index.html` SHA-256:
+`17e8ccbb6354a5bb31ca834df201183d78266a2f7bc17dbaa2adc73efe8431b0`.
+The live response matches that asset, plus Cloudflare's analytics beacon.
+
+## Current rollback target
+
+The previous working version is `e3cdfd44-8aa5-4029-80aa-dc55e7df6588`
+(deployment `2c865c6e-dd94-4728-a4bd-deff119ff81c`). That is the
+credential-persistence release. Preserve Worker `jc`, the DNS record, and the
+`jc.csi.run/*` route.
+
+## Credential persistence release — 2026-11-06
 
 Status: credential-persistence fix published to GitHub and deployed to
 https://jc.csi.run on 2026-11-06 at approximately 19:06 Arizona time.
@@ -135,10 +164,12 @@ No JavaScript errors were observed. No model was started or dependency upgraded.
 - Original local maintenance history is retained on
   `release/local-maintenance-2026-11-06`.
 
-## Current rollback target
+## Earlier rollback target
 
-The previous working version is `18e10a13-accc-4679-8a06-e8ee3fb1b5a9`
+Before the credential-persistence release, the working version was
+`18e10a13-accc-4679-8a06-e8ee3fb1b5a9`
 (deployment `9d93673a-fddb-43d3-baaa-2f97eb5865f6`). Preserve Worker `jc`, DNS,
-and the `jc.csi.run/*` route. Rolling back also restores the old credential-saving
-behavior; prefer a forward fix for credential-related defects. Removed browser
-credentials cannot be recovered by rollback and must be entered again.
+and the `jc.csi.run/*` route. Rolling back that far restores the old
+credential-saving behavior; prefer a forward fix for credential-related defects.
+Removed browser credentials cannot be recovered by rollback and must be entered
+again.
