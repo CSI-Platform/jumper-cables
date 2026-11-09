@@ -10,7 +10,7 @@ Pull request: https://github.com/CSI-Platform/jumper-cables/pull/1
 
 Branch: `SEO`
 
-Commit: `776a3310318bf10fc4c8de267bcd34641be40ef0`
+The commands are in commit `776a3310318bf10fc4c8de267bcd34641be40ef0`. Merge the pull request. A later commit on `SEO` adds this file only, and that file is not part of the website.
 
 That commit puts four finished `llama-server` commands in the page HTML, in `public/llms.txt`, and in the README. An agent can read a command without using the form. `python3 src/jc.py` prints the same command.
 
@@ -30,7 +30,7 @@ After a real deploy, the live page should show the four commands, and https://jc
 
 ## Steps
 
-1. Merge pull request 1 into `main`, or deploy commit `776a331` only after checking it is still the commit you mean.
+1. Merge pull request 1 into `main`. Deploy that merge. Do not deploy an older commit that leaves this checklist behind unless you have checked the `public/` files are the ones you mean.
 2. From a clean checkout of that commit:
 
 ```bash
