@@ -78,6 +78,10 @@ h1 { font-size: 30px; line-height: 36px; }
 .setting > label, .setting > .lbl { padding-top: 6px; font-size: 14px; line-height: 20px; color: var(--ink2); }
 .setting > .ctrl { display: grid; gap: 8px; min-width: 0; justify-items: start; }
 .help { font-size: 13px; line-height: 20px; color: var(--ink3); max-width: 60ch; }
+.answers { display: grid; gap: 16px; }
+.answers h3 { font-size: 14px; line-height: 20px; }
+.answers .item { display: grid; gap: 8px; }
+pre.answer { margin: 0; padding: 12px 16px; background: var(--step); border-radius: 8px; font-size: 13px; line-height: 20px; white-space: pre-wrap; overflow-wrap: anywhere; }
 .help code { color: var(--ink2); overflow-wrap: anywhere; }
 .help a { color: var(--ink2); }
 
@@ -373,6 +377,25 @@ SOFTWARE.
         <h1>Jump-start a local model in the llama.cpp web UI</h1>
         <p class="sub">Tell this page about your computer and your model, and it writes the command. A web page can't start programs, so you paste it into a terminal yourself. Nothing leaves your browser.</p>
       </header>
+
+      <div class="group" id="answers">
+        <h2>How do I start a local llama.cpp server?</h2>
+        <p class="help">Four Linux commands. Replace the model path, then paste into a terminal. For macOS or Windows, run <code>python3 src/jc.py</code> from the <a href="https://github.com/CSI-Platform/jumper-cables">GitHub repo</a>.</p>
+        <div class="answers"><div class="item"><h3>All on GPU</h3><p class="help">Every layer on the GPU, with the largest context that fits. Usually the fastest.</p><pre class="answer">llama-server \
+  -m /path/to/your-model.gguf \
+  --n-gpu-layers all \
+  --fit on \
+  --port 8080</pre></div><div class="item"><h3>Long memory</h3><p class="help">Asks for a 32K context. On a small GPU, some layers may move to the CPU.</p><pre class="answer">llama-server \
+  -m /path/to/your-model.gguf \
+  --ctx-size 32768 \
+  --port 8080</pre></div><div class="item"><h3>CPU only</h3><p class="help">Runs without the GPU. Slower, but works on any machine with enough RAM.</p><pre class="answer">llama-server \
+  -m /path/to/your-model.gguf \
+  --n-gpu-layers 0 \
+  --port 8080</pre></div><div class="item"><h3>Read-only tools</h3><p class="help">The model can search and read files your account can read, including private ones. It can&#x27;t change anything. Experimental.</p><p class="help">Tools are on. They&#x27;re experimental and can read what your account can read.</p><pre class="answer">llama-server \
+  -m /path/to/your-model.gguf \
+  --tools read_file,file_glob_search,grep_search,get_info \
+  --port 8080</pre></div></div>
+      </div>
 
       <div class="group">
         <h2>Your computer</h2>

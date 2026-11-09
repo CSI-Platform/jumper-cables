@@ -15,6 +15,8 @@ import sys
 from collections import Counter
 from pathlib import Path
 
+import engine
+
 SRC = Path(__file__).resolve().parent
 TOKEN = re.compile(r"(?:^|(?<=[\s,]))(-{1,2}[A-Za-z][\w.-]*),?")
 esc = html.escape
@@ -223,6 +225,7 @@ def main():
         "%%GLOSSARY%%": gloss, "%%TOTAL%%": str(len(opts)), "%%FLAGCOUNT%%": str(flagcount), "%%START_COUNT%%": str(counts["S"]),
         "%%N_S%%": str(counts["S"]), "%%N_U%%": str(counts["U"]), "%%NAV%%": "".join(nav), "%%SECTIONS%%": "".join(sections),
         "%%PROFILE_JSON%%": profile_json, "%%SCRIPT%%": (SRC / "app.js").read_text(),
+        "%%ANSWERS%%": engine.answers_html(),
     }
     for k, v in fill.items():
         page = page.replace(k, v)
@@ -237,6 +240,11 @@ def main():
 
     a.out.parent.mkdir(parents=True, exist_ok=True)
     a.out.write_text(page)
+    public_page = (SRC.parent / "public" / "index.html").resolve()
+    if a.profile is None and a.out.resolve() == public_page:
+        llms = public_page.parent / "llms.txt"
+        llms.write_text(engine.llms_text())
+        print(f"{llms}: {llms.stat().st_size} bytes")
 
     absent = [t for o in opts for t in o["tokens"] if f"<code>{esc(t)}</code>" not in page]
     absent += [o["env"] for o in opts if o["env"] and f"<code>{o['env']}</code>" not in page]
