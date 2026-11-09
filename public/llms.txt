@@ -1,0 +1,47 @@
+# Jumper Cables
+
+How do I start a local llama.cpp server?
+
+Paste one of these on Linux. Replace /path/to/your-model.gguf.
+For macOS or Windows, from this repo run: python3 src/jc.py --preset gpu --os mac --model /path/to/your-model.gguf
+Repo: https://github.com/CSI-Platform/jumper-cables
+
+## All on GPU
+
+Every layer on the GPU, with the largest context that fits. Usually the fastest.
+
+llama-server \
+  -m /path/to/your-model.gguf \
+  --n-gpu-layers all \
+  --fit on \
+  --port 8080
+
+## Long memory
+
+Asks for a 32K context. On a small GPU, some layers may move to the CPU.
+
+llama-server \
+  -m /path/to/your-model.gguf \
+  --ctx-size 32768 \
+  --port 8080
+
+## CPU only
+
+Runs without the GPU. Slower, but works on any machine with enough RAM.
+
+llama-server \
+  -m /path/to/your-model.gguf \
+  --n-gpu-layers 0 \
+  --port 8080
+
+## Read-only tools
+
+The model can search and read files your account can read, including private ones. It can't change anything. Experimental.
+Tools are on. They're experimental and can read what your account can read.
+
+llama-server \
+  -m /path/to/your-model.gguf \
+  --tools read_file,file_glob_search,grep_search,get_info \
+  --port 8080
+
+Full option catalog: https://jc.csi.run

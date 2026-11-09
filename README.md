@@ -22,6 +22,65 @@ controls for adding supported options to your command.
 Jumper Cables runs in your browser. It does not install software, host a model,
 or start a server on your computer.
 
+## A command you can copy
+
+Linux. Replace the model path. The same four commands are in `public/llms.txt`.
+
+### All on GPU
+
+Every layer on the GPU, with the largest context that fits. Usually the fastest.
+
+```bash
+llama-server \
+  -m /path/to/your-model.gguf \
+  --n-gpu-layers all \
+  --fit on \
+  --port 8080
+```
+
+### Long memory
+
+Asks for a 32K context. On a small GPU, some layers may move to the CPU.
+
+```bash
+llama-server \
+  -m /path/to/your-model.gguf \
+  --ctx-size 32768 \
+  --port 8080
+```
+
+### CPU only
+
+Runs without the GPU. Slower, but works on any machine with enough RAM.
+
+```bash
+llama-server \
+  -m /path/to/your-model.gguf \
+  --n-gpu-layers 0 \
+  --port 8080
+```
+
+### Read-only tools
+
+The model can search and read files your account can read, including private ones. It can't change anything. Experimental.
+
+Tools are on. They're experimental and can read what your account can read.
+
+```bash
+llama-server \
+  -m /path/to/your-model.gguf \
+  --tools read_file,file_glob_search,grep_search,get_info \
+  --port 8080
+```
+
+Print the same command for another machine from this repo:
+
+```bash
+python3 src/jc.py --preset gpu --model /path/to/your-model.gguf
+python3 src/jc.py --preset readonly --os win --model C:\models\x.gguf
+python3 src/jc.py --list
+```
+
 ## What it does
 
 - Writes the start command for Linux, macOS or Windows (PowerShell), with a plain-English note under every line
@@ -66,6 +125,7 @@ python3 src/build.py
 For a local preview, open `public/index.html` in a browser. Opening
 `src/template.html` redirects to that built page; rebuild after editing sources.
 The page builds commands; it does not install or start a model server.
+`python3 src/jc.py --help` prints a starting command without opening the page.
 
 This writes `public/index.html`. The build stops with an error if any flag in the help output has no explanation, so an option can't go missing without anyone noticing.
 

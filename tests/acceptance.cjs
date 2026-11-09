@@ -30,6 +30,23 @@ const results = [];
     assert.equal(await page.locator('.opt').count(),257);
     assert.equal(await page.locator('#profile').textContent(),'null');
   });
+  await check('fetchable answers match the built command', async()=>{
+    try {
+      const answers = await page.locator('pre.answer').evaluateAll(els => els.map(el => el.textContent));
+      assert.equal(answers.length, 4);
+      const raw = fs.readFileSync(path.join(ROOT, 'public/index.html'), 'utf8');
+      const head = raw.split('<script type="application/json" id="profile">', 1)[0];
+      const ids = ['gpu', 'long', 'cpu', 'readonly'];
+      await page.locator('#model').fill('/path/to/your-model.gguf');
+      for (let i = 0; i < ids.length; i++) {
+        assert.ok(head.includes(answers[i]), ids[i]);
+        await page.locator('#p-' + ids[i]).check();
+        assert.equal(await command(), answers[i]);
+      }
+    } finally {
+      await page.locator('#reset').click();
+    }
+  });
   await check('Linux model command, copy, and persistence',async()=>{
     await page.locator('#model').fill("/tmp/models/O'Brien $(touch SHOULD_NOT_EXIST).gguf");
     assert.match(await command(), /--port 8080/);

@@ -81,6 +81,10 @@ h1 { font-size: 30px; line-height: 36px; }
 .setting > label, .setting > .lbl { padding-top: 6px; font-size: 14px; line-height: 20px; color: var(--ink2); }
 .setting > .ctrl { display: grid; gap: 8px; min-width: 0; justify-items: start; }
 .help { font-size: 13px; line-height: 20px; color: var(--ink3); max-width: 60ch; }
+.answers { display: grid; gap: 16px; }
+.answers h3 { font-size: 14px; line-height: 20px; }
+.answers .item { display: grid; gap: 8px; }
+pre.answer { margin: 0; padding: 12px 16px; background: var(--step); border-radius: 8px; font-size: 13px; line-height: 20px; white-space: pre-wrap; overflow-wrap: anywhere; }
 .help code { color: var(--ink2); overflow-wrap: anywhere; }
 .help a { color: var(--ink2); }
 
@@ -307,6 +311,12 @@ td code { white-space: nowrap; }
         <h1>Jump-start a local model in the llama.cpp web UI</h1>
         <p class="sub">%%HERO_NOTE%%</p>
       </header>
+
+      <div class="group" id="answers">
+        <h2>How do I start a local llama.cpp server?</h2>
+        <p class="help">Four Linux commands. Replace the model path, then paste into a terminal. For macOS or Windows, run <code>python3 src/jc.py</code> from the <a href="https://github.com/CSI-Platform/jumper-cables">GitHub repo</a>.</p>
+        <div class="answers">%%ANSWERS%%</div>
+      </div>
 
       <div class="group">
         <h2>Your computer</h2>
